@@ -63,21 +63,3 @@ shift_allocations = [
     {"user_id": "EMP014", "shift": "Morning", "schedule_template": "Standard"},
     {"user_id": "EMP015", "shift": "Morning", "schedule_template": "Flexible"},
 ]
-
-# ── mileage records ────────────────────────────────────────
-mileage_records = [
-    {"user_id": "EMP001", "date": "2026-06-16", "start_mileage": 45230, "end_mileage": 45285, "total_miles": 55, "vehicle_id": "VEH001", "purpose": "Client Visit", "location": "Downtown"},
-    {"user_id": "EMP002", "date": "2026-06-16", "start_mileage": 32145, "end_mileage": 32210, "total_miles": 65, "vehicle_id": "VEH002", "purpose": "Supply Run", "location": "Warehouse"},
-    {"user_id": "EMP006", "date": "2026-06-16", "start_mileage": 67890, "end_mileage": 67945, "total_miles": 55, "vehicle_id": "VEH003", "purpose": "Patrol", "location": "Premises"},
-    {"user_id": "EMP010", "date": "2026-06-16", "start_mileage": 12450, "end_mileage": 12510, "total_miles": 60, "vehicle_id": "VEH003", "purpose": "Patrol", "location": "Premises"},
-    {"user_id": "EMP012", "date": "2026-06-16", "start_mileage": 56780, "end_mileage": 56845, "total_miles": 65, "vehicle_id": "VEH004", "purpose": "Meeting", "location": "Branch Office"},
-]
-
-# ── fuel records ──────────────────────────────────────────
-fuel_records = [
-    {"user_id": "EMP001", "date": "2026-06-16", "vehicle_id": "VEH001", "fuel_type": "Petrol", "liters_filled": 45.5, "amount_spent": 273000, "currency": "UGX", "odometer_reading": 45285},
-    {"user_id": "EMP002", "date": "2026-06-16", "vehicle_id": "VEH002", "fuel_type": "Diesel", "liters_filled": 50.0, "amount_spent": 290000, "currency": "UGX", "odometer_reading": 32210},
-    {"user_id": "EMP006", "date": "2026-06-16", "vehicle_id": "VEH003", "fuel_type": "Petrol", "liters_filled": 40.0, "amount_spent": 240000, "currency": "UGX", "odometer_reading": 67945},
-    {"user_id": "EMP010", "date": "2026-06-16", "vehicle_id": "VEH003", "fuel_type": "Petrol", "liters_filled": 38.5, "amount_spent": 231000, "currency": "UGX", "odometer_reading": 12510},
-    {"user_id": "EMP012", "date": "2026-06-16", "vehicle_id": "VEH004", "fuel_type": "Diesel", "liters_filled": 55.0, "amount_spent": 318000, "currency": "UGX", "odometer_reading": 56845},
-]

@@ -1,39 +1,28 @@
-from flask import Flask,jsonify,request
-from flask_cors import CORS 
-from mock_data import employees, attendence_records, shift_allocations
-app=Flask()
+from mockdata import employees
+from datetime import datetime
 
-#.....user reports........
-@app.route("/api/users/all", methods=["GET"])
+
 def get_all_users():
-    return jsonify(employees)
+    return employees
 
-@app.route("/api/users/new", methods=["GET"])
 def get_new_users():
-    new_users = [e for e in employees if e["is_new_user"]]
-    return jsonify(new_users)
+    return [e for e in employees if e["is_new_user"]]
 
-@app.route("/api/users/no-credentials", methods=["GET"])
 def get_users_no_credentials():
-    no_creds = [e for e in employees if not e["has_credentials"]]
-    return jsonify(no_creds)
+    return [e for e in employees if not e["has_credentials"]]
 
-@app.route("/api/users/expiring-soon", methods=["GET"])
 def get_expiring_soon():
-    from datetime import datetime
     today = datetime.today()
-    expiring = [
+    return [
         e for e in employees
         if (datetime.strptime(e["account_expiry"], "%Y-%m-%d") - today).days <= 30
     ]
-    return jsonify(expiring)
 
-@app.route("/api/users/by-category", methods=["GET"])
-def get_users_by_category():
-    categories = {}
-    for e in employees:
-        cat = e["category"]
-        if cat not in categories:
-            categories[cat] = []
-        categories[cat].append(e)
-    return jsonify(categories)
+def get_users_by_category(category):
+    return [e for e in employees if e["category"] == category]
+
+def get_users_on_device():
+    return [e for e in employees if e["card_status"] == "active"]
+
+def get_exceptional_users():
+    return [e for e in employees if e["card_status"] == "blacklisted"]

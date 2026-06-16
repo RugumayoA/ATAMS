@@ -1,4 +1,4 @@
-from mock_data import employees, attendance_records
+from mockdata import employees, attendance_records
 
 def get_attendance_summary():
     present  = [r for r in attendance_records if r["check_in"]]
@@ -24,8 +24,14 @@ def get_attendance_by_department():
             departments[dept]["absent"] += 1
     return departments
 
+   
+
 def get_public_holiday_attendance():
-    return [r for r in attendance_records if r["is_public_holiday"]]
+    #return [r["user_id"] for r in attendance_records if r["is_public_holiday"]]
+    return [{"user_id": r["user_id"], "date": r["date"]} for r in attendance_records if r["is_public_holiday"]]
+
 
 def get_weekend_attendance():
-    return [r for r in attendance_records if r["is_weekend"]]
+    #return [r for r in attendance_records if r["is_weekend"]]
+    #return [r["user_id"] for r in attendance_records if r["is_weekend"]]
+    return [{"user_id": r["user_id"], "date": r["date"]} for r in attendance_records if r["is_weekend"]]

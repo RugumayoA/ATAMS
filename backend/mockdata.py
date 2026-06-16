@@ -24,7 +24,7 @@ employees = [
     {"user_id": "EMP015", "name": "Olivia Nassuna",   "department": "Finance",     "directorate": "Finance",     "category": "Part Time",  "card_id": "CARD015", "card_status": "active",      "has_credentials": False, "is_new_user": True,  "account_expiry": "2026-07-25"},
 ]
 
-# ── attendance records ────────────────────────────────────
+# ── attendance derecords ────────────────────────────────────
 attendance_records = [
     {"user_id": "EMP001", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": "08:45", "check_out": "17:00", "on_leave": False, "is_weekend": False, "is_public_holiday": False, "overtime_hours": 0, "extra_hours": 0, "meal_punch": True,  "meal_accepted": True,  "abscondment": False},
     {"user_id": "EMP002", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": "08:00", "check_out": "17:00", "on_leave": False, "is_weekend": False, "is_public_holiday": False, "overtime_hours": 0, "extra_hours": 0, "meal_punch": True,  "meal_accepted": True,  "abscondment": False},

@@ -1,53 +1,62 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS
-from mockdata import employees, attendance_records, shift_allocations
-
-app = Flask(__name__)
-CORS(app)
+from mock_data import attendance_records
 
 
-# ── TIME-BASED EXCEPTION REPORTS ─────────────────────────
-
-@app.route("/api/exceptions/late-clockout", methods=["GET"])
-def get_late_clockout():
-    late_out = [
-        r for r in attendance_records
-        if r["check_out"] and r["check_out"] > r["shift_end"]
-    ]
-    return jsonify(late_out)
-@app.route("/api/exceptions/late-clockin", methods=["GET"])
 def get_late_clockin():
-    late = [
+    return [
         r for r in attendance_records
         if r["check_in"] and r["check_in"] > r["shift_start"]
     ]
-    return jsonify(late)
 
-@app.route("/api/exceptions/early-clockout", methods=["GET"])
+
 def get_early_clockout():
-    early_out = [
+    return [
         r for r in attendance_records
         if r["check_out"] and r["check_out"] < r["shift_end"]
     ]
-    return jsonify(early_out)
 
-@app.route("/api/exceptions/early-clockin", methods=["GET"])
+
 def get_early_clockin():
-    early_in = [
+    return [
         r for r in attendance_records
         if r["check_in"] and r["check_in"] < r["shift_start"]
     ]
-    return jsonify(early_in)
 
-@app.route("/api/exceptions/incomplete", methods=["GET"])
+
+def get_late_clockout():
+    return [
+        r for r in attendance_records
+        if r["check_out"] and r["check_out"] > r["shift_end"]
+    ]
+
+
 def get_incomplete_attendance():
-    incomplete = [
+    return [
         r for r in attendance_records
         if r["check_in"] and not r["check_out"]
     ]
-    return jsonify(incomplete)
 
-@app.route("/api/exceptions/abscondment", methods=["GET"])
+
 def get_abscondment():
-    absconded = [r for r in attendance_records if r["abscondment"]]
-    return jsonify(absconded)
+    return [r for r in attendance_records if r["abscondment"]]
+
+
+def get_meal_punch_only():
+    return [
+        r for r in attendance_records
+        if r["meal_punch"] and not r["check_in"]
+    ]
+
+
+def get_low_working_hours(min_hours=8):
+    low = []
+    for r in attendance_records:
+        if r["check_in"] and r["check_out"]:
+            fmt = "%H:%M"
+            from datetime import datetime
+            start = datetime.strptime(r["check_in"],  fmt)
+            end   = datetime.strptime(r["check_out"], fmt)
+            hours = (end - start).seconds / 3600
+            if hours < min_hours:
+                r["hours_worked"] = round(hours, 2)
+                low.append(r)
+    return low

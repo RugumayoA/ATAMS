@@ -57,8 +57,6 @@ def get_mileage_by_purpose():
     return list(mileage_by_purpose.values())
 
 
-
-
 def get_fuel_summary():
     return fuel_records
 

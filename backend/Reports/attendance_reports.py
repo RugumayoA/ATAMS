@@ -1,11 +1,16 @@
-from flask import Flask, jsonify
+from mock_data import employees, attendance_records
 
-app = Flask(__name__)
+def get_attendance_summary():
+    present  = [r for r in attendance_records if r["check_in"]]
+    absent   = [r for r in attendance_records if not r["check_in"] and not r["on_leave"]]
+    on_leave = [r for r in attendance_records if r["on_leave"]]
+    return {
+        "total":    len(attendance_records),
+        "present":  len(present),
+        "absent":   len(absent),
+        "on_leave": len(on_leave)
+    }
 
-# Mock data
-employees = []  # Load from database or mock data
-attendance_records = []  # Load from database or mock data
-@app.route("/api/attendance/by-department", methods=["GET"])
 def get_attendance_by_department():
     dept_map = {e["user_id"]: e["department"] for e in employees}
     departments = {}
@@ -17,14 +22,10 @@ def get_attendance_by_department():
             departments[dept]["present"] += 1
         else:
             departments[dept]["absent"] += 1
-    return jsonify(departments)
+    return departments
 
-@app.route("/api/attendance/public-holidays", methods=["GET"])
 def get_public_holiday_attendance():
-    ph = [r for r in attendance_records if r["is_public_holiday"]]
-    return jsonify(ph)
+    return [r for r in attendance_records if r["is_public_holiday"]]
 
-@app.route("/api/attendance/weekends", methods=["GET"])
 def get_weekend_attendance():
-    weekends = [r for r in attendance_records if r["is_weekend"]]
-    return jsonify(weekends)
+    return [r for r in attendance_records if r["is_weekend"]]

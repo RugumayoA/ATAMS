@@ -1,7 +1,8 @@
 from flask import Flask,jsonify,request
 from flask_cors import CORS 
-from mock_data import employees, attendence_records, shift_allocations
-app=Flask()
+from mockdata import employees, attendence_records, shift_allocations
+app=Flask(__name__)
+CORS(app)
 
 #.....user reports........
 @app.route("/api/users/all", methods=["GET"])

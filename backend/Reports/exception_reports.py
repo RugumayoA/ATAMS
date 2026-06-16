@@ -1,4 +1,4 @@
-from mock_data import attendance_records
+from mockdata import attendance_records
 
 
 def get_late_clockin():

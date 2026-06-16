@@ -1,3 +1,10 @@
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+# Mock data
+employees = []  # Load from database or mock data
+attendance_records = []  # Load from database or mock data
 @app.route("/api/attendance/by-department", methods=["GET"])
 def get_attendance_by_department():
     dept_map = {e["user_id"]: e["department"] for e in employees}

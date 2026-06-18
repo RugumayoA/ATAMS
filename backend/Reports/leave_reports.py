@@ -37,21 +37,4 @@ def get_leave_reconciliation():
     ]
 
 
-def get_leave_summary():
-    """
-    Get a summary of leave by date.
-    Returns: Dictionary with date as key and list of staff on leave.
-    """
-    leave_by_date = {}
-    
-    for r in attendance_records:
-        if r["on_leave"]:
-            date = r["date"]
-            if date not in leave_by_date:
-                leave_by_date[date] = []
-            leave_by_date[date].append({
-                "user_id": r["user_id"],
-                "shift": r["shift"]
-            })
-    
-    return leave_by_date
+

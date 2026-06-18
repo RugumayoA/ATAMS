@@ -5,3 +5,5 @@
 from .user_reports import *
 from .attendance_reports import *
 from .time_exception_reports import *
+from .shift_reports import *
+from .overtime_reports import *

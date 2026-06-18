@@ -5,7 +5,7 @@ import random
 def rand_time(hour, minute_range):
     return f"{hour:02d}:{random.randint(*minute_range):02d}"
 
-# ── employees ────────────────────────────────────────────
+
 employees = [
     {"user_id": "EMP001", "name": "Alice Nakato",     "department": "IT",          "directorate": "Technology",  "category": "Full Time",  "card_id": "CARD001", "card_status": "active",      "has_credentials": True,  "is_new_user": False, "account_expiry": "2026-07-05"},
     {"user_id": "EMP002", "name": "Brian Mugisha",    "department": "HR",          "directorate": "Admin",       "category": "Full Time",  "card_id": "CARD002", "card_status": "active",      "has_credentials": True,  "is_new_user": False, "account_expiry": "2026-12-01"},
@@ -24,14 +24,14 @@ employees = [
     {"user_id": "EMP015", "name": "Olivia Nassuna",   "department": "Finance",     "directorate": "Finance",     "category": "Part Time",  "card_id": "CARD015", "card_status": "active",      "has_credentials": False, "is_new_user": True,  "account_expiry": "2026-07-25"},
 ]
 
-# ── attendance derecords ────────────────────────────────────
+
 attendance_records = [
     {"user_id": "EMP001", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": "08:45", "check_out": "17:00", "on_leave": False, "is_weekend": False, "is_public_holiday": False, "overtime_hours": 0, "extra_hours": 0, "meal_punch": True,  "meal_accepted": True,  "abscondment": False},
     {"user_id": "EMP002", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": "08:00", "check_out": "17:00", "on_leave": False, "is_weekend": False, "is_public_holiday": False, "overtime_hours": 0, "extra_hours": 0, "meal_punch": True,  "meal_accepted": True,  "abscondment": False},
     {"user_id": "EMP003", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": None,    "check_out": None,    "on_leave": True,  "is_weekend": False, "is_public_holiday": False, "overtime_hours": 0, "extra_hours": 0, "meal_punch": False, "meal_accepted": False, "abscondment": False},
     {"user_id": "EMP004", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": "09:30", "check_out": "17:00", "on_leave": False, "is_weekend": False, "is_public_holiday": False, "overtime_hours": 0, "extra_hours": 0, "meal_punch": True,  "meal_accepted": True,  "abscondment": False},
     {"user_id": "EMP005", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": "07:45", "check_out": "16:00", "on_leave": False, "is_weekend": False, "is_public_holiday": True, "overtime_hours": 0, "extra_hours": 0, "meal_punch": True,  "meal_accepted": False, "abscondment": False},
-    {"user_id": "EMP006", "date": "2026-06-16", "shift": "Night",   "shift_start": "22:00", "shift_end": "06:00", "check_in": "22:00", "check_out": "06:00", "on_leave": False, "is_weekend": False, "is_public_holiday": False, "overtime_hours": 2, "extra_hours": 1, "meal_punch": True,  "meal_accepted": True,  "abscondment": False},
+    {"user_id": "EMP006", "date": "2026-06-16", "shift": "Night",   "shift_start": "22:00", "shift_end": "06:00", "check_in": "22:00", "check_out": "06:00", "on_leave": True, "is_weekend": False, "is_public_holiday": False, "overtime_hours": 2, "extra_hours": 1, "meal_punch": True,  "meal_accepted": True,  "abscondment": False},
     {"user_id": "EMP007", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": "08:00", "check_out": "12:00", "on_leave": False, "is_weekend": False, "is_public_holiday": False, "overtime_hours": 0, "extra_hours": 0, "meal_punch": True,  "meal_accepted": True,  "abscondment": True},
     {"user_id": "EMP008", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": "08:10", "check_out": None,    "on_leave": False, "is_weekend": False, "is_public_holiday": False, "overtime_hours": 0, "extra_hours": 0, "meal_punch": True,  "meal_accepted": True,  "abscondment": False},
     {"user_id": "EMP009", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": None,    "check_out": None,    "on_leave": False, "is_weekend": False, "is_public_holiday": True, "overtime_hours": 0, "extra_hours": 0, "meal_punch": False, "meal_accepted": False, "abscondment": False},
@@ -43,7 +43,7 @@ attendance_records = [
     {"user_id": "EMP015", "date": "2026-06-16", "shift": "Morning", "shift_start": "08:00", "shift_end": "17:00", "check_in": "08:00", "check_out": "17:00", "on_leave": True,  "is_weekend": True, "is_public_holiday": False, "overtime_hours": 0, "extra_hours": 0, "meal_punch": False, "meal_accepted": False, "abscondment": False},
 ]
 
-# ── shift allocations ─────────────────────────────────────
+
 shift_allocations = [
     {"user_id": "EMP001", "shift": "Morning", "schedule_template": "Standard"},
     {"user_id": "EMP002", "shift": "Morning", "schedule_template": "Standard"},
@@ -62,4 +62,40 @@ shift_allocations = [
     {"user_id": "EMP013", "shift": "Morning", "schedule_template": "Standard"},
     {"user_id": "EMP014", "shift": "Morning", "schedule_template": "Standard"},
     {"user_id": "EMP015", "shift": "Morning", "schedule_template": "Flexible"},
+]
+
+
+mileage_records = [
+    {"user_id": "EMP001", "vehicle_id": "VEH001", "number_plate": "UBQ 456Y", "date": "2026-06-01", "total_miles": 45.2,  "purpose": "Client Visit"},
+    {"user_id": "EMP001", "vehicle_id": "VEH001", "number_plate": "UBQ 456Y", "date": "2026-06-05", "total_miles": 30.0,  "purpose": "Field Work"},
+    {"user_id": "EMP001", "vehicle_id": "VEH002", "number_plate": "UBK 782T", "date": "2026-06-10", "total_miles": 62.5,  "purpose": "Delivery"},
+    {"user_id": "EMP002", "vehicle_id": "VEH002", "number_plate": "UBK 782T", "date": "2026-06-02", "total_miles": 20.0,  "purpose": "Client Visit"},
+    {"user_id": "EMP002", "vehicle_id": "VEH002", "number_plate": "UBK 782T", "date": "2026-06-08", "total_miles": 15.5,  "purpose": "Office Errand"},
+    {"user_id": "EMP004", "vehicle_id": "VEH003", "number_plate": "UBH 231G", "date": "2026-06-03", "total_miles": 80.0,  "purpose": "Field Work"},
+    {"user_id": "EMP004", "vehicle_id": "VEH003", "number_plate": "UBH 231G", "date": "2026-06-09", "total_miles": 55.0,  "purpose": "Delivery"},
+    {"user_id": "EMP006", "vehicle_id": "VEH001", "number_plate": "UBQ 456Y", "date": "2026-06-04", "total_miles": 100.0, "purpose": "Field Work"},
+    {"user_id": "EMP006", "vehicle_id": "VEH004", "number_plate": "UBR 905M", "date": "2026-06-11", "total_miles": 38.7,  "purpose": "Client Visit"},
+    {"user_id": "EMP010", "vehicle_id": "VEH004", "number_plate": "UBR 905M", "date": "2026-06-06", "total_miles": 72.3,  "purpose": "Delivery"},
+    {"user_id": "EMP010", "vehicle_id": "VEH003", "number_plate": "UBH 231G", "date": "2026-06-12", "total_miles": 44.0,  "purpose": "Office Errand"},
+    {"user_id": "EMP012", "vehicle_id": "VEH002", "number_plate": "UBK 782T", "date": "2026-06-07", "total_miles": 90.1,  "purpose": "Field Work"},
+    {"user_id": "EMP013", "vehicle_id": "VEH004", "number_plate": "UBR 905M", "date": "2026-06-13", "total_miles": 25.0,  "purpose": "Client Visit"},
+    {"user_id": "EMP014", "vehicle_id": "VEH001", "number_plate": "UBQ 456Y", "date": "2026-06-14", "total_miles": 58.4,  "purpose": "Delivery"},
+    {"user_id": "EMP015", "vehicle_id": "VEH003", "number_plate": "UBH 231G", "date": "2026-06-15", "total_miles": 33.0,  "purpose": "Office Errand"},
+]
+
+
+fuel_records = [
+    {"user_id": "EMP001", "vehicle_id": "VEH001", "number_plate": "UBQ 456Y", "date": "2026-06-01", "fuel_type": "Petrol",  "liters_filled": 40.0, "amount_spent": 200000},
+    {"user_id": "EMP001", "vehicle_id": "VEH002", "number_plate": "UBK 782T", "date": "2026-06-10", "fuel_type": "Diesel",  "liters_filled": 55.0, "amount_spent": 275000},
+    {"user_id": "EMP002", "vehicle_id": "VEH002", "number_plate": "UBK 782T", "date": "2026-06-02", "fuel_type": "Diesel",  "liters_filled": 30.0, "amount_spent": 150000},
+    {"user_id": "EMP004", "vehicle_id": "VEH003", "number_plate": "UBH 231G", "date": "2026-06-03", "fuel_type": "Petrol",  "liters_filled": 60.0, "amount_spent": 300000},
+    {"user_id": "EMP004", "vehicle_id": "VEH003", "number_plate": "UBH 231G", "date": "2026-06-09", "fuel_type": "Petrol",  "liters_filled": 45.0, "amount_spent": 225000},
+    {"user_id": "EMP006", "vehicle_id": "VEH001", "number_plate": "UBQ 456Y", "date": "2026-06-04", "fuel_type": "Petrol",  "liters_filled": 70.0, "amount_spent": 350000},
+    {"user_id": "EMP006", "vehicle_id": "VEH004", "number_plate": "UBR 905M", "date": "2026-06-11", "fuel_type": "Diesel",  "liters_filled": 35.0, "amount_spent": 175000},
+    {"user_id": "EMP010", "vehicle_id": "VEH004", "number_plate": "UBR 905M", "date": "2026-06-06", "fuel_type": "Diesel",  "liters_filled": 50.0, "amount_spent": 250000},
+    {"user_id": "EMP010", "vehicle_id": "VEH003", "number_plate": "UBH 231G", "date": "2026-06-12", "fuel_type": "Petrol",  "liters_filled": 38.0, "amount_spent": 190000},
+    {"user_id": "EMP012", "vehicle_id": "VEH002", "number_plate": "UBK 782T", "date": "2026-06-07", "fuel_type": "Diesel",  "liters_filled": 65.0, "amount_spent": 325000},
+    {"user_id": "EMP013", "vehicle_id": "VEH004", "number_plate": "UBR 905M", "date": "2026-06-13", "fuel_type": "Petrol",  "liters_filled": 25.0, "amount_spent": 125000},
+    {"user_id": "EMP014", "vehicle_id": "VEH001", "number_plate": "UBQ 456Y", "date": "2026-06-14", "fuel_type": "Petrol",  "liters_filled": 48.0, "amount_spent": 240000},
+    {"user_id": "EMP015", "vehicle_id": "VEH003", "number_plate": "UBH 231G", "date": "2026-06-15", "fuel_type": "Diesel",  "liters_filled": 42.0, "amount_spent": 210000},
 ]

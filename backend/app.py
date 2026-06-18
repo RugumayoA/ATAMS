@@ -4,6 +4,11 @@ from flask_cors import CORS
 from Reports.user_reports import (get_all_users,get_new_users,get_users_no_credentials,get_users_by_category,get_expiring_soon, get_users_on_device,get_exceptional_users)
 from Reports.attendance_reports import (get_attendance_summary,get_attendance_by_department,get_public_holiday_attendance,get_weekend_attendance)
 from Reports.time_exception_reports import (get_late_clockin,get_early_clockout,get_early_clockin,get_late_clockout,get_incomplete_attendance,get_abscondment,get_meal_punch_only,get_low_working_hours)
+from Reports.shift_reports import (get_shift_allocations,get_overlapping_shifts,get_overlapping_shifts_summary)
+#from Reports.overtime_reports import (get_overtime_summary,get_extra_hours_summary,get_overtime_vs_extra_hours)
+from Reports.leave_reports import (get_staff_on_leave,get_leave_reconciliation)
+
+
 
 app = Flask(__name__) #create a Flask application instance
 CORS(app)             # disables cross-origin sharing restrictions  allowing frontend to communicate with backed
@@ -95,8 +100,32 @@ def meal_punch_only():
 
 @app.route("/api/time_exceptions/low_working_hours", methods=["GET"])
 def low_working_hours():  
-    return jsonify(get_low_working_hours())     
+    return jsonify(get_low_working_hours())  
 
+
+#-------------SHIFT REPORTS-----------------
+@app.route("/api/shifts/allocations", methods=["GET"])
+def shift_allocations():
+    return jsonify(get_shift_allocations())
+
+@app.route("/api/shifts/overlapping", methods=["GET"])
+def overlapping_shifts():
+    return jsonify(get_overlapping_shifts())
+
+'''@app.route("/api/shifts/overlapping/summary", methods=["GET"])
+def overlapping_shifts_summary():
+    return jsonify(get_overlapping_shifts_summary())'''
+
+
+
+#-------------LEAVE REPORTS-----------------
+@app.route("/api/leave/staff-on-leave", methods=["GET"])
+def staff_on_leave():
+    return jsonify(get_staff_on_leave())
+
+@app.route("/api/leave/reconciliation", methods=["GET"])
+def leave_reconciliation():
+    return jsonify(get_leave_reconciliation())  
 
 
 

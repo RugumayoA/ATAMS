@@ -20,8 +20,8 @@ def get_overtime_vs_extra_hours():
         if r["overtime_hours"] > 0 or r["extra_hours"] > 0
     ]
 
-def get_mileage_summary():
-    return mileage_records
+'''def get_mileage_summary():
+    return mileage_records'''
 
 
 def get_total_mileage_by_employee():
@@ -73,7 +73,7 @@ def get_total_fuel_expense_by_employee():
     return list(fuel_by_employee.values())
 
 
-def get_fuel_by_vehicle():
+''''def get_fuel_by_vehicle():
     fuel_by_vehicle = {}
     for record in fuel_records:
         vehicle_id = record["vehicle_id"]
@@ -82,10 +82,10 @@ def get_fuel_by_vehicle():
         fuel_by_vehicle[vehicle_id]["total_fuel_liters"] += record["liters_filled"]
         fuel_by_vehicle[vehicle_id]["total_amount_spent"] += record["amount_spent"]
         fuel_by_vehicle[vehicle_id]["fuel_transactions"] += 1
-    return list(fuel_by_vehicle.values())
+    return list(fuel_by_vehicle.values())'''
 
 
-def get_fuel_by_type():
+''''def get_fuel_by_type():
     fuel_by_type = {}
     for record in fuel_records:
         fuel_type = record["fuel_type"]
@@ -94,5 +94,5 @@ def get_fuel_by_type():
         fuel_by_type[fuel_type]["total_liters"] += record["liters_filled"]
         fuel_by_type[fuel_type]["total_spent"] += record["amount_spent"]
         fuel_by_type[fuel_type]["transactions"] += 1
-    return list(fuel_by_type.values())
+    return list(fuel_by_type.values())'''
 

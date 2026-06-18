@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 
 from Reports.user_reports import (get_all_users,get_new_users,get_users_no_credentials,get_users_by_category,get_expiring_soon, get_users_on_device,get_exceptional_users)
+from Reports.cards import (get_card_status,get_staff_assigned_to_cards,get_blacklisted_cards,get_denied_cards)
 from Reports.attendance_reports import (get_attendance_summary,get_attendance_by_department,get_public_holiday_attendance,get_weekend_attendance)
 from Reports.time_exception_reports import (get_late_clockin,get_early_clockout,get_early_clockin,get_late_clockout,get_incomplete_attendance,get_abscondment,get_meal_punch_only,get_low_working_hours)
 from Reports.shift_reports import (get_shift_allocations,get_overlapping_shifts,get_overlapping_shifts_summary)
@@ -48,6 +49,23 @@ def active_devices():
 def exceptional_users():
     return jsonify(get_exceptional_users()) 
 
+
+#-------------CARD REPORTS-----------------
+@app.route("/api/cards/status", methods=["GET"])
+def card_status():
+    return jsonify(get_card_status())
+
+@app.route("/api/cards/assigned", methods=["GET"])
+def staff_assigned_to_cards():
+    return jsonify(get_staff_assigned_to_cards())
+
+@app.route("/api/cards/blacklisted", methods=["GET"])
+def blacklisted_cards():
+    return jsonify(get_blacklisted_cards())
+
+@app.route("/api/cards/denied", methods=["GET"])
+def denied_cards():
+    return jsonify(get_denied_cards())
 
 
 #-------------ATTENDANCE REPORTS-----------------

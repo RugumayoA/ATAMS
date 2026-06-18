@@ -7,3 +7,6 @@ from .attendance_reports import *
 from .time_exception_reports import *
 from .shift_reports import *
 from .overtime_reports import *
+from .leave_reports import *
+from .cards import *
+from .meals_report import *

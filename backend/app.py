@@ -8,7 +8,8 @@ from Reports.time_exception_reports import (get_late_clockin,get_early_clockout,
 from Reports.shift_reports import (get_shift_allocations,get_overlapping_shifts,get_overlapping_shifts_summary)
 #from Reports.overtime_reports import (get_overtime_summary,get_extra_hours_summary,get_overtime_vs_extra_hours)
 from Reports.leave_reports import (get_staff_on_leave,get_leave_reconciliation)
-
+from Reports.meals_report import get_meals_summary
+from Reports.overtime_reports import (get_overtime_summary,get_extra_hours_summary,get_overtime_vs_extra_hours,get_total_mileage_by_employee,get_fuel_summary)  
 
 
 app = Flask(__name__) #create a Flask application instance
@@ -144,6 +145,38 @@ def staff_on_leave():
 @app.route("/api/leave/reconciliation", methods=["GET"])
 def leave_reconciliation():
     return jsonify(get_leave_reconciliation())  
+
+
+
+#-------------MEALS REPORTS-----------------
+@app.route("/api/meals/summary", methods=["GET"])
+def meals_summary():        
+    return jsonify(get_meals_summary())
+
+
+#------------OVERTIME REPORTS-----------------
+@app.route("/api/overtime/summary", methods=["GET"])        
+def overtime_summary():        
+    return jsonify(get_overtime_summary())  
+
+@app.route("/api/overtime/extra-hours", methods=["GET"])
+def extra_hours_summary():  
+    return jsonify(get_extra_hours_summary())
+
+@app.route("/api/overtime/overtime-vs-extra-hours", methods=["GET"])
+def overtime_vs_extra_hours():  
+    return jsonify(get_overtime_vs_extra_hours())   
+
+@app.route("/api/overtime/total-mileage-by-employee", methods=["GET"])
+def total_mileage_by_employee():  
+    return jsonify(get_total_mileage_by_employee()) 
+
+@app.route("/api/overtime/fuel-summary", methods=["GET"])
+def fuel_summary(): 
+    return jsonify(get_fuel_summary())  
+
+
+
 
 
 

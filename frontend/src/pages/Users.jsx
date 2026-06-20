@@ -39,9 +39,9 @@ function Users() {
         color: "white",
         marginBottom: "30px"
       }}>
-        <h1 style={{ margin: 0 }}>👥 User Reports</h1>
+        <h1 style={{ margin: 0 }}> User Reports</h1>
         <p style={{ margin: "6px 0 0", opacity: 0.8 }}>
-          Civil Aviation Authority of Uganda
+        
         </p>
       </div>
 

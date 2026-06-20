@@ -1,48 +1,80 @@
-import { Link } from "react-router-dom";
-
+import { NavLink } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users,
+  ClipboardList,
+  AlertTriangle,
+  Clock,
+  Timer,
+  CalendarClock,
+  UtensilsCrossed,
+  CreditCard,
+  Plane,
+} from "lucide-react";
 
 const links = [
-  { path: "/",           label: "📊 Dashboard"   },
-  { path: "/users",      label: "👥 Users"        },
-  { path: "/attendance", label: "📋 Attendance"   },
-  { path: "/exceptions", label: "⏰ Exceptions"   },
-  { path: "/shifts",     label: "🔄 Shifts"       },
-  { path: "/overtime",   label: "💼 Overtime"     },
-  { path: "/leave",      label: "🏖️ Leave"        },
-  { path: "/meals",      label: "🍽️ Meals"        },
-  { path: "/cards",      label: "💳 Cards"        },
+  { path: "/", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/users", label: "Users", icon: Users },
+  { path: "/attendance", label: "Attendance", icon: ClipboardList },
+  { path: "/exceptions", label: "Exceptions", icon: AlertTriangle },
+  { path: "/shifts", label: "Shifts", icon: Clock },
+  { path: "/overtime", label: "Overtime", icon: Timer },
+  { path: "/leave", label: "Leave", icon: CalendarClock },
+  { path: "/meals", label: "Meals", icon: UtensilsCrossed },
+  { path: "/cards", label: "Cards", icon: CreditCard },
 ];
+
+const NAVY = "#1e3a5f";
+const NAVY_ACTIVE = "#2C72B0";
+const MUTED = "#9FB0C3";
 
 function Sidebar() {
   return (
-    <div style={{
-      width: "220px",
-      minHeight: "100vh",
-      background: "#1e3a5f",
-      padding: "20px 0",
-    }}>
-      <h2 style={{
-        color: "white",
-        textAlign: "center",
-        marginBottom: "30px",
-        fontSize: "16px"
-      }}>
-        ✈️ ATAMS
-      </h2>
-      {links.map((link) => (
-        <Link
-          key={link.path}
-          to={link.path}
-          style={{
-            display: "block",
-            color: "white",
-            padding: "12px 20px",
+    <div
+      style={{
+        width: "220px",
+        minHeight: "100vh",
+        background: NAVY,
+        padding: "20px 0",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          color: "white",
+          marginBottom: "30px",
+          fontSize: "16px",
+          fontWeight: 600,
+        }}
+      >
+        <Plane size={18} />
+        ATAMS
+      </div>
+
+      {links.map(({ path, label, icon: Icon }) => (
+        <NavLink
+          key={path}
+          to={path}
+          end={path === "/"}
+          style={({ isActive }) => ({
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            margin: "0 12px",
+            padding: "10px 12px",
+            borderRadius: "8px",
             textDecoration: "none",
             fontSize: "14px",
-          }}
+            color: isActive ? "#FFFFFF" : MUTED,
+            backgroundColor: isActive ? NAVY_ACTIVE : "transparent",
+          })}
         >
-          {link.label}
-        </Link>
+          <Icon size={16} />
+          {label}
+        </NavLink>
       ))}
     </div>
   );

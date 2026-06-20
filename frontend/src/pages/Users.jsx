@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../components/api/axios";
+import { Users as UsersIcon, AlertTriangle, UserPlus } from "lucide-react";
 
 const TABS = [
   { label: "All Users",        endpoint: "/users/all"            },
@@ -9,6 +10,27 @@ const TABS = [
   { label: "On Device",        endpoint: "/users/active"         },
   { label: "Exceptional",      endpoint: "/users/exceptional"    },
 ];
+
+
+const C = {
+  ink: "#101826",
+  navy: "#1e3a5f",
+  sky: "#2C72B0",
+  mute: "#6B7785",
+  border: "#E4E7EB",
+  runway: "#F3F5F7",
+  green: "#2F8F5B",
+  red: "#C9483D",
+};
+
+const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+
+const cardStyle = {
+  background: "white",
+  borderRadius: "12px",
+  padding: "24px",
+  border: `1px solid ${C.border}`,
+};
 
 function Users() {
   const [activeTab, setActiveTab] = useState(0);
@@ -28,44 +50,55 @@ function Users() {
       });
   }, [activeTab]);
 
+  const summaryCards = [
+    { label: "Total Users", value: users.length, color: C.sky, icon: UsersIcon },
+    { label: "No Credentials", value: users.filter(u => !u.has_credentials).length, color: C.red, icon: AlertTriangle },
+    { label: "New Users", value: users.filter(u => u.is_new_user).length, color: C.green, icon: UserPlus },
+  ];
+
   return (
     <div style={{ fontFamily: "Segoe UI, sans-serif", padding: "30px" }}>
 
       {/* Header */}
       <div style={{
-        background: "linear-gradient(135deg, #1e3a5f, #2d6a9f)",
+        background: `linear-gradient(110deg, ${C.navy} 0%, ${C.sky} 100%)`,
         borderRadius: "16px",
         padding: "30px",
         color: "white",
-        marginBottom: "30px"
+        marginBottom: "30px",
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
       }}>
-        <h1 style={{ margin: 0 }}> User Reports</h1>
-        <p style={{ margin: "6px 0 0", opacity: 0.8 }}>
-        
-        </p>
+        <UsersIcon size={24} />
+        <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 600 }}> USER REPORTS</h1>
       </div>
 
       {/* Summary Cards */}
       <div style={{
         display: "grid",
         gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "20px",
+        gap: "16px",
         marginBottom: "30px"
       }}>
-        {[
-          { label: "Total Users",      value: users.length,                                 color: "#1e3a5f", icon: "👥" },
-          { label: "No Credentials",   value: users.filter(u => !u.has_credentials).length, color: "#c62828", icon: "⚠️" },
-          { label: "New Users",        value: users.filter(u => u.is_new_user).length,      color: "#2e7d32", icon: "🆕" },
-        ].map((card) => (
-          <div key={card.label} style={{
-            background: "white",
-            borderRadius: "12px",
-            padding: "24px",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-            borderLeft: `5px solid ${card.color}`,
-          }}>
-            <p style={{ margin: 0, color: "#666", fontSize: "13px" }}>{card.icon} {card.label}</p>
-            <h2 style={{ margin: "8px 0 0", fontSize: "36px", color: card.color }}>{card.value}</h2>
+        {summaryCards.map(({ label, value, color, icon: Icon }) => (
+          <div key={label} style={{ ...cardStyle, display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ background: `${color}1A`, borderRadius: "8px", padding: "8px", display: "flex" }}>
+                <Icon size={18} color={color} />
+              </div>
+              <span style={{ fontSize: "13px", color: C.mute }}>{label}</span>
+            </div>
+            <h2 style={{
+              margin: 0,
+              fontSize: "34px",
+              fontWeight: 600,
+              fontFamily: MONO,
+              fontVariantNumeric: "tabular-nums",
+              color: C.ink,
+            }}>
+              {value}
+            </h2>
           </div>
         ))}
       </div>
@@ -81,9 +114,9 @@ function Users() {
               borderRadius: "8px",
               border: "none",
               cursor: "pointer",
-              fontWeight: activeTab === i ? "bold" : "normal",
-              background: activeTab === i ? "#1e3a5f" : "#f0f0f0",
-              color: activeTab === i ? "white" : "#333",
+              fontWeight: activeTab === i ? 600 : 400,
+              background: activeTab === i ? C.navy : C.runway,
+              color: activeTab === i ? "white" : C.mute,
               fontSize: "13px",
             }}
           >
@@ -93,32 +126,29 @@ function Users() {
       </div>
 
       {/* Table */}
-      <div style={{
-        background: "white",
-        borderRadius: "12px",
-        padding: "24px",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.08)"
-      }}>
-        <h3 style={{ marginTop: 0, color: "#1e3a5f" }}>
+      <div style={cardStyle}>
+        <h3 style={{ marginTop: 0, marginBottom: "16px", color: C.ink, fontSize: "15px" }}>
           {TABS[activeTab].label}
         </h3>
 
-        {loading ? <p>Loading...</p> : users.length === 0 ? (
-          <p style={{ color: "#999" }}>No records found.</p>
+        {loading ? (
+          <p style={{ color: C.mute }}>Loading...</p>
+        ) : users.length === 0 ? (
+          <p style={{ color: C.mute }}>No records found.</p>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "#1e3a5f", color: "white" }}>
+              <tr style={{ background: C.navy, color: "white" }}>
                 {["ID", "Name", "Department", "Category", "Card ID", "Card Status", "Credentials", "Expiry"].map((h) => (
-                  <th key={h} style={{ padding: "12px", textAlign: "left", fontSize: "13px" }}>{h}</th>
+                  <th key={h} style={{ padding: "12px", textAlign: "left", fontSize: "13px", fontWeight: 600 }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {users.map((user, i) => (
                 <tr key={user.user_id} style={{
-                  background: i % 2 === 0 ? "#f9f9f9" : "white",
-                  borderBottom: "1px solid #eee"
+                  background: i % 2 === 0 ? C.runway : "white",
+                  borderBottom: `1px solid ${C.border}`
                 }}>
                   <td style={td}>{user.user_id}</td>
                   <td style={td}>{user.name}</td>
@@ -127,8 +157,8 @@ function Users() {
                   <td style={td}>{user.card_id}</td>
                   <td style={td}>
                     <span style={{
-                      background: user.card_status === "active" ? "#e8f5e9" : "#ffebee",
-                      color:      user.card_status === "active" ? "#2e7d32" : "#c62828",
+                      background: user.card_status === "active" ? `${C.green}1A` : `${C.red}1A`,
+                      color:      user.card_status === "active" ? C.green : C.red,
                       padding: "4px 10px",
                       borderRadius: "20px",
                       fontSize: "12px"
@@ -138,8 +168,8 @@ function Users() {
                   </td>
                   <td style={td}>
                     <span style={{
-                      background: user.has_credentials ? "#e8f5e9" : "#ffebee",
-                      color:      user.has_credentials ? "#2e7d32" : "#c62828",
+                      background: user.has_credentials ? `${C.green}1A` : `${C.red}1A`,
+                      color:      user.has_credentials ? C.green : C.red,
                       padding: "4px 10px",
                       borderRadius: "20px",
                       fontSize: "12px"

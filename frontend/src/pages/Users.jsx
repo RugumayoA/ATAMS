@@ -74,34 +74,6 @@ function Users() {
         <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 600, color: "white" }}> USER REPORTS</h1>
       </div>
 
-      {/* Summary Cards */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "16px",
-        marginBottom: "30px"
-      }}>
-        {summaryCards.map(({ label, value, color, icon: Icon }) => (
-          <div key={label} style={{ ...cardStyle, display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ background: `${color}1A`, borderRadius: "8px", padding: "8px", display: "flex" }}>
-                <Icon size={18} color={color} />
-              </div>
-              <span style={{ fontSize: "13px", color: C.mute }}>{label}</span>
-            </div>
-            <h2 style={{
-              margin: 0,
-              fontSize: "34px",
-              fontWeight: 600,
-              fontFamily: MONO,
-              fontVariantNumeric: "tabular-nums",
-              color: C.ink,
-            }}>
-              {value}
-            </h2>
-          </div>
-        ))}
-      </div>
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>

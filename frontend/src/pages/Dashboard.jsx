@@ -131,7 +131,7 @@ export default function Dashboard() {
             </h1>
           </div>
           <p style={{ fontSize: 13, marginTop: 4, marginBottom: 0, color: "#C7D7E5" }}>
-            Civil Aviation Authority of Uganda — Attendance Overview
+            Uganda Civil Aviation Authority Attendance Overview
           </p>
         </div>
         <div style={{ textAlign: "right" }}>

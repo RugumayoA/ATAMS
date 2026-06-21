@@ -1,4 +1,136 @@
+import { useEffect, useState } from "react";
+import API from "../components/api/axios";
+import { AlertTriangle } from "lucide-react";
+
+const TABS = [
+  { label: "Late Clock In",        endpoint: "/time_exceptions/late_clockin"        },
+  { label: "Early Clock Out",      endpoint: "/time_exceptions/early_clockout"      },
+  { label: "Early Clock In",       endpoint: "/time_exceptions/early_clockin"       },
+  { label: "Late Clock Out",       endpoint: "/time_exceptions/late_clockout"       },
+  { label: "Incomplete Attendance",endpoint: "/time_exceptions/incomplete_attendance"},
+  { label: "Abscondment",          endpoint: "/time_exceptions/abscondment"         },
+  { label: "Meal Punch Only",      endpoint: "/time_exceptions/meal_punch_only"     },
+  { label: "Low Working Hours",    endpoint: "/time_exceptions/low_working_hours"   },
+];
+
 function Exceptions() {
-  return <div><h1>Exception Reports</h1></div>;
+  const [activeTab, setActiveTab] = useState(0);
+  const [records, setRecords]     = useState([]);
+  const [loading, setLoading]     = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    API.get(TABS[activeTab].endpoint)
+      .then((res) => {
+        setRecords(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [activeTab]);
+
+  return (
+    <div style={{ fontFamily: "Segoe UI, sans-serif", padding: "30px" }}>
+
+      {/* Header */}
+      <div style={{
+        background: "linear-gradient(135deg, #1e3a5f, #2d6a9f)",
+        borderRadius: "16px",
+        padding: "30px",
+        color: "white",
+        marginBottom: "30px"
+      }}>
+        <h1 style={{ margin: 0, display: "flex", alignItems: "center", gap: "10px" , fontSize: "22px", fontWeight: 600, color: "white"}}>
+         <AlertTriangle size={28} color="white" />
+         TIME EXCEPTIONS REPORTS
+       </h1>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
+        {TABS.map((tab, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveTab(i)}
+            style={{
+              padding: "10px 16px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: activeTab === i ? "bold" : "normal",
+              background: activeTab === i ? "#1e3a5f" : "#f0f0f0",
+              color: activeTab === i ? "white" : "#333",
+              fontSize: "13px",
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Table */}
+      <div style={{
+        background: "white",
+        borderRadius: "12px",
+        padding: "24px",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.08)"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+          <h3 style={{ margin: 0, color: "#1e3a5f" }}>
+            {TABS[activeTab].label}
+          </h3>
+          <span style={{
+            background: "#1e3a5f",
+            color: "white",
+            borderRadius: "20px",
+            padding: "4px 14px",
+            fontSize: "13px",
+            fontWeight: 500,
+          }}>
+            {records.length} record{records.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+
+        {loading ? <p>Loading...</p> : records.length === 0 ? (
+          <p style={{ color: "#999" }}>No records found.</p>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "#1e3a5f", color: "white" }}>
+                {Object.keys(records[0]).map((key) => (
+                  <th key={key} style={{ padding: "12px", textAlign: "left", fontSize: "13px" }}>
+                    {key.replace(/_/g, " ")}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {records.map((rec, i) => (
+                <tr key={i} style={{
+                  background: i % 2 === 0 ? "#f9f9f9" : "white",
+                  borderBottom: "1px solid #eee"
+                }}>
+                  {Object.values(rec).map((val, j) => (
+                    <td key={j} style={td}>
+                      {val === null ? "—" : val === true ? "Yes" : val === false ? "No" : String(val)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
 }
+
+const td = {
+  padding: "12px",
+  fontSize: "13px",
+  color: "#333"
+};
+
 export default Exceptions;

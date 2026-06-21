@@ -57,6 +57,5 @@ def get_low_working_hours(min_hours=8):
             end   = datetime.strptime(r["check_out"], fmt)
             hours = (end - start).seconds / 3600
             if hours < min_hours:
-                r["hours_worked"] = round(hours, 2)
-                low.append(r)
+                low.append({**r, "hours_worked": round(hours, 2)})
     return low

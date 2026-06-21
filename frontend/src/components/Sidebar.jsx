@@ -16,7 +16,7 @@ const links = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
   { path: "/users", label: "Users", icon: Users },
   { path: "/attendance", label: "Attendance", icon: ClipboardList },
-  { path: "/exceptions", label: "Exceptions", icon: AlertTriangle },
+  { path: "/exceptions", label: "Time Exceptions", icon: AlertTriangle },
   { path: "/shifts", label: "Shifts", icon: Clock },
   { path: "/overtime", label: "Overtime", icon: Timer },
   { path: "/leave", label: "Leave", icon: CalendarClock },

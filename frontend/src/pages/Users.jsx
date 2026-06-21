@@ -71,7 +71,7 @@ function Users() {
         gap: "12px",
       }}>
         <UsersIcon size={24} />
-        <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 600 }}> USER REPORTS</h1>
+        <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 600, color: "white" }}> USER REPORTS</h1>
       </div>
 
       {/* Summary Cards */}
@@ -127,9 +127,21 @@ function Users() {
 
       {/* Table */}
       <div style={cardStyle}>
-        <h3 style={{ marginTop: 0, marginBottom: "16px", color: C.ink, fontSize: "15px" }}>
-          {TABS[activeTab].label}
-        </h3>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+          <h3 style={{ margin: 0, color: C.ink, fontSize: "15px" }}>
+            {TABS[activeTab].label}
+          </h3>
+          <span style={{
+            background: C.navy,
+            color: "white",
+            borderRadius: "20px",
+            padding: "4px 14px",
+            fontSize: "13px",
+            fontWeight: 500,
+          }}>
+            {users.length} record{users.length !== 1 ? "s" : ""}
+          </span>
+        </div>
 
         {loading ? (
           <p style={{ color: C.mute }}>Loading...</p>

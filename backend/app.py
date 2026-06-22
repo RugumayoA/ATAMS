@@ -13,6 +13,7 @@ from Reports.overtime_reports import (get_overtime_summary,get_extra_hours_summa
 
 
 app = Flask(__name__) #create a Flask application instance
+app.json.sort_keys = False
 CORS(app)             # disables cross-origin sharing restrictions  allowing frontend to communicate with backed
 
 @app.route("/") #register a route for the root URL ("/") of the applrsication

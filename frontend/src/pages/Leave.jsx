@@ -36,7 +36,7 @@ function Leave() {
         color: "white",
         marginBottom: "30px"
       }}>
-        <h1 style={{ margin: 0, display: "flex", alignItems: "center", gap: "10px", fontSize: "22px", fontWeight: 600 }}>
+        <h1 style={{ margin: 0, display: "flex", alignItems: "center", gap: "10px", fontSize: "22px", fontWeight: 600, color: "white" }}>
           <Calendar size={28} color="white" />
           LEAVE REPORTS
         </h1>

@@ -1,17 +1,16 @@
-from mockdata import attendance_records
+from mockdata import attendance_records, employees
+
+_emp_lookup = {e["user_id"]: e for e in employees}
 
 
 def get_staff_on_leave():
-    """
-    Get all staff marked as on leave.
-    Returns: List of leave records with user_id, date, shift, and leave status.
-    """
     return [
         {
-            "user_id": r["user_id"],
-            "date": r["date"],
-            "shift": r["shift"],
-            "on_leave": r["on_leave"]
+            "employee_name": _emp_lookup.get(r["user_id"], {}).get("name", "Unknown"),
+            "user_id":       r["user_id"],
+            "department":    _emp_lookup.get(r["user_id"], {}).get("department", "Unknown"),
+            "date":          r["date"],
+            "shift":         r["shift"],
         }
         for r in attendance_records if r["on_leave"]
     ]
@@ -24,13 +23,13 @@ def get_leave_reconciliation():
     """
     return [
         {
-            "user_id": r["user_id"],
-            "date": r["date"],
-            "shift": r["shift"],
-            "on_leave": r["on_leave"],
-            "check_in": r["check_in"],
-            "check_out": r["check_out"],
-            "status": "ANOMALY - On Leave but Clocked In"
+            "employee_name": _emp_lookup.get(r["user_id"], {}).get("name", "Unknown"),
+            "user_id":       r["user_id"],
+            "date":          r["date"],
+            "shift":         r["shift"],
+            "check_in":      r["check_in"],
+            "check_out":     r["check_out"],
+            "status":        "ANOMALY - On Leave but Clocked In"
         }
         for r in attendance_records
         if r["on_leave"] and r["check_in"]

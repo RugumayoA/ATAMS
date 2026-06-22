@@ -139,28 +139,8 @@ function Users() {
                   <td style={td}>{user.department}</td>
                   <td style={td}>{user.category}</td>
                   <td style={td}>{user.card_id}</td>
-                  <td style={td}>
-                    <span style={{
-                      background: user.card_status === "active" ? `${C.green}1A` : `${C.red}1A`,
-                      color:      user.card_status === "active" ? C.green : C.red,
-                      padding: "4px 10px",
-                      borderRadius: "20px",
-                      fontSize: "12px"
-                    }}>
-                      {user.card_status}
-                    </span>
-                  </td>
-                  <td style={td}>
-                    <span style={{
-                      background: user.has_credentials ? `${C.green}1A` : `${C.red}1A`,
-                      color:      user.has_credentials ? C.green : C.red,
-                      padding: "4px 10px",
-                      borderRadius: "20px",
-                      fontSize: "12px"
-                    }}>
-                      {user.has_credentials ? "Yes" : "No"}
-                    </span>
-                  </td>
+                  <td style={td}>{user.card_status}</td>
+                  <td style={td}>{user.has_credentials ? "Yes" : "No"}</td>
                   <td style={td}>{user.account_expiry}</td>
                 </tr>
               ))}

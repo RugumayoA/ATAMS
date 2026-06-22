@@ -33,9 +33,14 @@ function Sidebar() {
     <div
       style={{
         width: "220px",
-        minHeight: "100vh",
+        height: "100vh",
+        position: "fixed",
+        top: 0,
+        left: 0,
         background: NAVY,
         padding: "20px 0",
+        overflowY: "auto",
+        zIndex: 100,
       }}
     >
       <div

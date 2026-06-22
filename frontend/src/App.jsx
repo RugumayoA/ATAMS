@@ -15,7 +15,7 @@ function App() {
     <Router>
       <div style={{ display: "flex" }}>
         <Sidebar />
-        <div style={{ flex: 1, padding: "20px" }}>
+        <div style={{ flex: 1, padding: "20px", marginLeft: "220px" }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />

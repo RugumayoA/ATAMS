@@ -1,15 +1,18 @@
-from mockdata import shift_allocations
+from mockdata import shift_allocations, employees
 from collections import Counter
+
+_name_lookup = {e["user_id"]: e["name"] for e in employees}
 
 
 def get_shift_allocations():
     """
     Get all shift allocations with their schedule templates.
-    Returns: List of allocations with user_id, shift, and schedule_template.
+    Returns: List of allocations with user_id, employee_name, shift, and schedule_template.
     """
     return [
         {
             "user_id": s["user_id"],
+            "employee_name": _name_lookup.get(s["user_id"], "Unknown"),
             "shift": s["shift"],
             "schedule_template": s["schedule_template"]
         }
@@ -26,6 +29,7 @@ def get_overlapping_shifts():
     return [
         {
             "user_id": s["user_id"],
+            "employee_name": _name_lookup.get(s["user_id"], "Unknown"),
             "shift": s["shift"],
             "schedule_template": s["schedule_template"]
         }

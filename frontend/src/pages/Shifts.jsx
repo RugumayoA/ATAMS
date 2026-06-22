@@ -133,33 +133,31 @@ function Shifts() {
         ) : filtered.length === 0 ? (
           <p style={{ color: "#999" }}>No records found.</p>
         ) : (
-          <div style={{ overflowY: "auto", maxHeight: "55vh" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: "#1e3a5f", color: "white" }}>
-                  {Object.keys(filtered[0]).map((key) => (
-                    <th key={key} style={{ padding: "12px", textAlign: "left", fontSize: "13px", position: "sticky", top: 0, background: "#1e3a5f", zIndex: 1 }}>
-                      {key.replace(/_/g, " ").toUpperCase()}
-                    </th>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "#1e3a5f", color: "white" }}>
+                {Object.keys(filtered[0]).map((key) => (
+                  <th key={key} style={{ padding: "12px", textAlign: "left", fontSize: "13px" }}>
+                    {key.replace(/_/g, " ").toUpperCase()}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((rec, i) => (
+                <tr key={i} style={{
+                  background: i % 2 === 0 ? "#f9f9f9" : "white",
+                  borderBottom: "1px solid #eee"
+                }}>
+                  {Object.values(rec).map((val, j) => (
+                    <td key={j} style={td}>
+                      {val === null ? "—" : String(val)}
+                    </td>
                   ))}
                 </tr>
-              </thead>
-              <tbody>
-                {filtered.map((rec, i) => (
-                  <tr key={i} style={{
-                    background: i % 2 === 0 ? "#f9f9f9" : "white",
-                    borderBottom: "1px solid #eee"
-                  }}>
-                    {Object.values(rec).map((val, j) => (
-                      <td key={j} style={td}>
-                        {val === null ? "—" : String(val)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>

@@ -56,7 +56,7 @@ function Sidebar() {
         }}
       >
         <Plane size={18} />
-        ATAMS
+        ATAMS REPORTS
       </div>
 
       {links.map(({ path, label, icon: Icon }) => (

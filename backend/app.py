@@ -1,185 +1,34 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 
-from Reports.user_reports import (get_all_users,get_new_users,get_users_no_credentials,get_users_by_category,get_expiring_soon, get_users_on_device,get_exceptional_users)
-from Reports.cards import (get_card_status,get_staff_assigned_to_cards,get_blacklisted_cards,get_denied_cards)
-from Reports.attendance_reports import (get_attendance_summary,get_attendance_by_department,get_public_holiday_attendance,get_weekend_attendance)
-from Reports.time_exception_reports import (get_late_clockin,get_early_clockout,get_early_clockin,get_late_clockout,get_incomplete_attendance,get_abscondment,get_meal_punch_only,get_low_working_hours)
-from Reports.shift_reports import (get_shift_allocations,get_overlapping_shifts,get_overlapping_shifts_summary)
-#from Reports.overtime_reports import (get_overtime_summary,get_extra_hours_summary,get_overtime_vs_extra_hours)
-from Reports.leave_reports import (get_staff_on_leave,get_leave_reconciliation)
-from Reports.meals_report import get_meals_summary
-from Reports.overtime_reports import (get_overtime_summary,get_extra_hours_summary,get_overtime_vs_extra_hours,get_total_mileage_by_employee,get_fuel_summary)  
+from endpoints.users_endpoints import users_bp
+from endpoints.cards_endpoints import cards_bp
+from endpoints.attendance_endpoints import attendance_bp
+from endpoints.time_exceptions_endpoints import time_exceptions_bp
+from endpoints.shifts_endpoints import shifts_bp
+from endpoints.leave_endpoints import leave_bp
+from endpoints.meals_endpoints import meals_bp
+from endpoints.overtime_endpoints import overtime_bp
 
 
-app = Flask(__name__) #create a Flask application instance
+app = Flask(__name__)
 app.json.sort_keys = False
-CORS(app)             # disables cross-origin sharing restrictions  allowing frontend to communicate with backed
+CORS(app)
 
-@app.route("/") #register a route for the root URL ("/") of the applrsication
+app.register_blueprint(users_bp)
+app.register_blueprint(cards_bp)
+app.register_blueprint(attendance_bp)
+app.register_blueprint(time_exceptions_bp)
+app.register_blueprint(shifts_bp)
+app.register_blueprint(leave_bp)
+app.register_blueprint(meals_bp)
+app.register_blueprint(overtime_bp)
+
+
+@app.route("/")
 def home():
     return jsonify({"message": "ATAMS Backend is running!"})
 
 
-
-#-------------USER REPORTS-----------------
-@app.route("/api/users/all", methods=["GET"])
-def all_users():
-    return jsonify(get_all_users())
-
-@app.route("/api/users/new",  methods=["GET"])
-def new_users():
-    return jsonify(get_new_users())
-
-@app.route("/api/users/no-credentials", methods=["GET"])
-def users_no_credentials():
-    return jsonify(get_users_no_credentials())
-
-@app.route("/api/users/category/<category>", methods=["GET"])
-def users_by_category(category):
-    return jsonify(get_users_by_category(category))
-
-@app.route("/api/users/expiring-soon", methods=["GET"]) # supposed to be exceptional users and we change when we get the real data
-def expiring_soon():
-    return jsonify(get_expiring_soon())
-
-@app.route("/api/users/active", methods=["GET"])
-def active_devices():
-    return jsonify(get_users_on_device())
-
-@app.route("/api/users/exceptional", methods=["GET"])
-def exceptional_users():
-    return jsonify(get_exceptional_users()) 
-
-
-#-------------CARD REPORTS-----------------
-@app.route("/api/cards/status", methods=["GET"])
-def card_status():
-    return jsonify(get_card_status())
-
-@app.route("/api/cards/assigned", methods=["GET"])
-def staff_assigned_to_cards():
-    return jsonify(get_staff_assigned_to_cards())
-
-@app.route("/api/cards/blacklisted", methods=["GET"])
-def blacklisted_cards():
-    return jsonify(get_blacklisted_cards())
-
-@app.route("/api/cards/denied", methods=["GET"])
-def denied_cards():
-    return jsonify(get_denied_cards())
-
-
-#-------------ATTENDANCE REPORTS-----------------
-@app.route("/api/attendance/summary", methods=["GET"])
-def attendance_summary():
-    return jsonify(get_attendance_summary())    
-
-@app.route("/api/attendance/department", methods=["GET"])
-def attendance_by_department():
-    return jsonify(get_attendance_by_department())
-
-@app.route("/api/attendance/public-holiday", methods=["GET"])
-def public_holiday_attendance():
-    return jsonify(get_public_holiday_attendance()) 
-
-@app.route("/api/attendance/weekend", methods=["GET"])
-def weekend_attendance():
-    return jsonify(get_weekend_attendance())
-
-
-
-#---------------TIME EXCEPTION REPORTS-----------------
-@app.route("/api/time_exceptions/late_clockin", methods=["GET"])
-def late_clockin():
-    return jsonify(get_late_clockin())
-
-@app.route("/api/time_exceptions/early_clockout", methods=["GET"])
-def early_clockout():
-    return jsonify(get_early_clockout())
-
-@app.route("/api/time_exceptions/early_clockin", methods=["GET"])
-def early_clockin():
-    return jsonify(get_early_clockin())
-
-@app.route("/api/time_exceptions/late_clockout", methods=["GET"])
-def late_clockout():
-    return jsonify(get_late_clockout())
-
-@app.route("/api/time_exceptions/incomplete_attendance", methods=["GET"])
-def incomplete_attendance():    
-    return jsonify(get_incomplete_attendance())     
-
-@app.route("/api/time_exceptions/abscondment", methods=["GET"])
-def abscondment():  
-    return jsonify(get_abscondment())       
-
-@app.route("/api/time_exceptions/meal_punch_only", methods=["GET"])
-def meal_punch_only():  
-    return jsonify(get_meal_punch_only())   
-
-@app.route("/api/time_exceptions/low_working_hours", methods=["GET"])
-def low_working_hours():  
-    return jsonify(get_low_working_hours())  
-
-
-#-------------SHIFT REPORTS-----------------
-@app.route("/api/shifts/allocations", methods=["GET"])
-def shift_allocations():
-    return jsonify(get_shift_allocations())
-
-@app.route("/api/shifts/overlapping", methods=["GET"])
-def overlapping_shifts():
-    return jsonify(get_overlapping_shifts())
-
-'''@app.route("/api/shifts/overlapping/summary", methods=["GET"])
-def overlapping_shifts_summary():
-    return jsonify(get_overlapping_shifts_summary())'''
-
-
-
-#-------------LEAVE REPORTS-----------------
-@app.route("/api/leave/staff-on-leave", methods=["GET"])
-def staff_on_leave():
-    return jsonify(get_staff_on_leave())
-
-@app.route("/api/leave/reconciliation", methods=["GET"])
-def leave_reconciliation():
-    return jsonify(get_leave_reconciliation())  
-
-
-
-#-------------MEALS REPORTS-----------------
-@app.route("/api/meals/summary", methods=["GET"])
-def meals_summary():        
-    return jsonify(get_meals_summary())
-
-
-#------------OVERTIME REPORTS-----------------
-@app.route("/api/overtime/summary", methods=["GET"])        
-def overtime_summary():        
-    return jsonify(get_overtime_summary())  
-
-@app.route("/api/overtime/extra-hours", methods=["GET"])
-def extra_hours_summary():  
-    return jsonify(get_extra_hours_summary())
-
-@app.route("/api/overtime/overtime-vs-extra-hours", methods=["GET"])
-def overtime_vs_extra_hours():  
-    return jsonify(get_overtime_vs_extra_hours())   
-
-@app.route("/api/overtime/total-mileage-by-employee", methods=["GET"])
-def total_mileage_by_employee():  
-    return jsonify(get_total_mileage_by_employee()) 
-
-@app.route("/api/overtime/fuel-summary", methods=["GET"])
-def fuel_summary(): 
-    return jsonify(get_fuel_summary())  
-
-
-
-
-
-
-if __name__ == "__main__":      #starts app when you run python app.py 
+if __name__ == "__main__":
     app.run(debug=True, port=5000)

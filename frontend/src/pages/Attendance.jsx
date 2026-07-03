@@ -1,29 +1,70 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import API from "../components/api/axios";
 import { ClipboardList } from "lucide-react";
 
 const TABS = [
-  { label: "Summary",         endpoint: "/attendance/summary",        type: "summary" },
-  { label: "By Department",   endpoint: "/attendance/department",     type: "dept"    },
-  { label: "Public Holidays", endpoint: "/attendance/public-holiday", type: "staff"   },
-  { label: "Weekends",        endpoint: "/attendance/weekend",        type: "staff"   },
+  { label: "Summary",         endpoint: "/attendance/summary",         type: "summary"  },
+  { label: "By Department",   endpoint: "/attendance/by-department",   type: "dept"     },
+  { label: "Public Holidays", endpoint: "/attendance/public-holidays", type: "dated"    },
+  { label: "Weekends",        endpoint: "/attendance/weekends",        type: "dated"    },
 ];
 
-function DeptSection({ data, activeFilter, setActiveFilter, deptFilter }) {
-  const allRecords = data[FILTER_MAP[activeFilter]] || [];
-  const filtered = deptFilter === "All" ? allRecords : allRecords.filter(r => r.department === deptFilter);
+const th = { padding: "12px", textAlign: "left", fontSize: "13px", fontWeight: 600 };
+const td = { padding: "12px", fontSize: "13px", color: "#333", textAlign: "left" };
+
+function RecordTable({ records }) {
+  if (!records || records.length === 0)
+    return <p style={{ color: "#999" }}>No records found.</p>;
+  return (
+    <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+      <colgroup>
+        <col style={{ width: "12%" }} />
+        <col style={{ width: "25%" }} />
+        <col style={{ width: "22%" }} />
+        <col style={{ width: "13%" }} />
+        <col style={{ width: "14%" }} />
+        <col style={{ width: "14%" }} />
+      </colgroup>
+      <thead>
+        <tr style={{ background: "#1e3a5f", color: "white" }}>
+          <th style={th}>Employee ID</th>
+          <th style={th}>Name</th>
+          <th style={th}>Department</th>
+          <th style={th}>Date</th>
+          <th style={th}>In Time</th>
+          <th style={th}>Out Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {records.map((r, i) => (
+          <tr key={i} style={{ background: i % 2 === 0 ? "#f9f9f9" : "white", borderBottom: "1px solid #eee" }}>
+            <td style={td}>{r.userId}</td>
+            <td style={td}>{r.userName}</td>
+            <td style={td}>{r.userGroupName}</td>
+            <td style={td}>{r.date}</td>
+            <td style={td}>{r.inTime}</td>
+            <td style={td}>{r.outTime}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function SummaryView({ data }) {
+  const [activeFilter, setActiveFilter] = useState("present");
+
+  const cards = [
+    { label: "Present", key: "present", count: data.present_count, color: "#2e7d32" },
+    { label: "Absent",  key: "absent",  count: data.absent_count,  color: "#c62828" },
+  ];
 
   return (
     <>
       <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
-        {[
-          { label: "Total",    key: "total",    value: data.total,    color: "#1e3a5f" },
-          { label: "Present",  key: "present",  value: data.present,  color: "#2e7d32" },
-          { label: "Absent",   key: "absent",   value: data.absent,   color: "#c62828" },
-          { label: "On Leave", key: "on_leave", value: data.on_leave, color: "#f57f17" },
-        ].map((card) => (
+        {cards.map((card) => (
           <div
-            key={card.label}
+            key={card.key}
             onClick={() => setActiveFilter(card.key)}
             style={{
               background: activeFilter === card.key ? card.color : "#fafafa",
@@ -37,106 +78,147 @@ function DeptSection({ data, activeFilter, setActiveFilter, deptFilter }) {
               transition: "background 0.2s",
             }}
           >
-            {card.label} : <strong>{card.value}</strong>
+            {card.label}: <strong>{card.count}</strong>
           </div>
         ))}
       </div>
-      <DeptTable records={filtered} />
+      <RecordTable records={data[activeFilter]} />
     </>
   );
 }
 
-function DeptTable({ records }) {
-  if (!records || records.length === 0)
-    return <p style={{ color: "#999" }}>No records found.</p>;
+function DeptView({ data }) {
+  const departments = Object.keys(data);
+  const [activeDept, setActiveDept] = useState(departments[0] || "");
+  const [activeFilter, setActiveFilter] = useState("present");
+
+  if (departments.length === 0)
+    return <p style={{ color: "#999" }}>No department data found.</p>;
+
+  const deptData = data[activeDept] || {};
+
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
-      <colgroup>
-        <col style={{ width: "20%" }} />
-        <col style={{ width: "20%" }} />
-        <col style={{ width: "35%" }} />
-        <col style={{ width: "25%" }} />
-      </colgroup>
-      <thead>
-        <tr style={{ background: "#1e3a5f", color: "white" }}>
-          <th style={th}>Department</th>
-          <th style={th}>Employee ID</th>
-          <th style={th}>Name</th>
-          <th style={th}>Card No</th>
-        </tr>
-      </thead>
-      <tbody>
-        {records.map((r, i) => (
-          <tr key={i} style={{ background: i % 2 === 0 ? "#f9f9f9" : "white", borderBottom: "1px solid #eee" }}>
-            <td style={td}>{r.department}</td>
-            <td style={td}>{r.employee_id}</td>
-            <td style={td}>{r.name}</td>
-            <td style={td}>{r.card_id}</td>
-          </tr>
+    <>
+      {/* Department selector */}
+      <div style={{ marginBottom: "16px" }}>
+        <select
+          value={activeDept}
+          onChange={(e) => { setActiveDept(e.target.value); setActiveFilter("present"); }}
+          style={{ padding: "6px 10px", borderRadius: "8px", border: "1px solid #E4E7EB", fontSize: "13px" }}
+        >
+          {departments.map((d) => <option key={d} value={d}>{d}</option>)}
+        </select>
+      </div>
+
+      {/* Present / Absent cards */}
+      <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
+        {[
+          { label: "Present", key: "present", count: deptData.present_count, color: "#2e7d32" },
+          { label: "Absent",  key: "absent",  count: deptData.absent_count,  color: "#c62828" },
+        ].map((card) => (
+          <div
+            key={card.key}
+            onClick={() => setActiveFilter(card.key)}
+            style={{
+              background: activeFilter === card.key ? card.color : "#fafafa",
+              border: `1px solid ${card.color}`,
+              borderRadius: "8px",
+              padding: "8px 16px",
+              cursor: "pointer",
+              fontSize: "13px",
+              fontWeight: 500,
+              color: activeFilter === card.key ? "white" : "#333",
+              transition: "background 0.2s",
+            }}
+          >
+            {card.label}: <strong>{card.count}</strong>
+          </div>
         ))}
-      </tbody>
-    </table>
+      </div>
+      <RecordTable records={deptData[activeFilter]} />
+    </>
   );
 }
 
-function StaffTable({ records }) {
-  if (!records || records.length === 0)
-    return <p style={{ color: "#999" }}>No records found.</p>;
+function DatedView({ data }) {
+  const dates = Object.keys(data);
+  const [activeDate, setActiveDate] = useState(dates[0] || "");
+  const [activeFilter, setActiveFilter] = useState("present");
+
+  if (dates.length === 0)
+    return <p style={{ color: "#999" }}>No data found for selected range.</p>;
+
+  const dateData = data[activeDate] || {};
+
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
-      <colgroup>
-        <col style={{ width: "25%" }} />
-        <col style={{ width: "50%" }} />
-        <col style={{ width: "25%" }} />
-      </colgroup>
-      <thead>
-        <tr style={{ background: "#1e3a5f", color: "white" }}>
-          <th style={th}>Employee ID</th>
-          <th style={th}>Name</th>
-          <th style={th}>Card No</th>
-        </tr>
-      </thead>
-      <tbody>
-        {records.map((r, i) => (
-          <tr key={i} style={{ background: i % 2 === 0 ? "#f9f9f9" : "white", borderBottom: "1px solid #eee" }}>
-            <td style={td}>{r.employee_id}</td>
-            <td style={td}>{r.name}</td>
-            <td style={td}>{r.card_id}</td>
-          </tr>
+    <>
+      {/* Date selector */}
+      <div style={{ marginBottom: "16px" }}>
+        <select
+          value={activeDate}
+          onChange={(e) => { setActiveDate(e.target.value); setActiveFilter("present"); }}
+          style={{ padding: "6px 10px", borderRadius: "8px", border: "1px solid #E4E7EB", fontSize: "13px" }}
+        >
+          {dates.map((d) => <option key={d} value={d}>{d}</option>)}
+        </select>
+      </div>
+
+      {/* Present / Absent cards */}
+      <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
+        {[
+          { label: "Present", key: "present", count: dateData.present_count, color: "#2e7d32" },
+          { label: "Absent",  key: "absent",  count: dateData.absent_count,  color: "#c62828" },
+        ].map((card) => (
+          <div
+            key={card.key}
+            onClick={() => setActiveFilter(card.key)}
+            style={{
+              background: activeFilter === card.key ? card.color : "#fafafa",
+              border: `1px solid ${card.color}`,
+              borderRadius: "8px",
+              padding: "8px 16px",
+              cursor: "pointer",
+              fontSize: "13px",
+              fontWeight: 500,
+              color: activeFilter === card.key ? "white" : "#333",
+              transition: "background 0.2s",
+            }}
+          >
+            {card.label}: <strong>{card.count}</strong>
+          </div>
         ))}
-      </tbody>
-    </table>
+      </div>
+      <RecordTable records={dateData[activeFilter]} />
+    </>
   );
 }
-
-const FILTER_MAP = {
-  total:    "all_records",
-  present:  "present_records",
-  absent:   "absent_records",
-  on_leave: "on_leave_records",
-};
 
 function Attendance() {
-  const [activeTab, setActiveTab]       = useState(0);
-  const [data, setData]                 = useState(null);
-  const [loading, setLoading]           = useState(true);
-  const [activeFilter, setActiveFilter] = useState("total");
-  const [deptFilter, setDeptFilter]     = useState("All");
+  const [activeTab, setActiveTab] = useState(0);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate]     = useState("");
+  const [userIds, setUserIds]     = useState("");
+  const [data, setData]           = useState(null);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState("");
 
-  useEffect(() => {
+  function handleFetch() {
+    if (!startDate || !endDate || !userIds.trim()) {
+      setError("Please fill in all fields before fetching.");
+      return;
+    }
+    setError("");
     setLoading(true);
-    setActiveFilter("total");
-    setDeptFilter("All");
-    API.get(TABS[activeTab].endpoint)
-      .then((res) => {
-        setData(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, [activeTab]);
+    setData(null);
+
+    API.post(TABS[activeTab].endpoint, {
+      start_date: startDate,
+      end_date:   endDate,
+      user_ids:   userIds,
+    })
+      .then((res) => { setData(res.data); setLoading(false); })
+      .catch((err) => { console.error(err); setError("Failed to fetch data."); setLoading(false); });
+  }
 
   const currentType = TABS[activeTab].type;
 
@@ -149,7 +231,7 @@ function Attendance() {
         borderRadius: "16px",
         padding: "30px",
         color: "white",
-        marginBottom: "30px"
+        marginBottom: "30px",
       }}>
         <h1 style={{ margin: 0, display: "flex", alignItems: "center", gap: "10px", fontSize: "22px", fontWeight: 600, color: "white" }}>
           <ClipboardList size={28} color="white" />
@@ -162,7 +244,7 @@ function Attendance() {
         {TABS.map((tab, i) => (
           <button
             key={i}
-            onClick={() => setActiveTab(i)}
+            onClick={() => { setActiveTab(i); setData(null); setError(""); }}
             style={{
               padding: "10px 16px",
               borderRadius: "8px",
@@ -179,87 +261,63 @@ function Attendance() {
         ))}
       </div>
 
-      {/* Content */}
+      {/* Filters */}
       <div style={{
         background: "white",
         borderRadius: "12px",
-        padding: "24px",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.08)"
+        padding: "20px 24px",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+        marginBottom: "20px",
+        display: "flex",
+        gap: "16px",
+        flexWrap: "wrap",
+        alignItems: "flex-end",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-          <h3 style={{ margin: 0, color: "#1e3a5f" }}>{TABS[activeTab].label}</h3>
-          {currentType === "dept" && data && (
-            <select
-              value={deptFilter}
-              onChange={(e) => setDeptFilter(e.target.value)}
-              style={{
-                padding: "6px 10px",
-                borderRadius: "8px",
-                border: "1px solid #E4E7EB",
-                fontSize: "13px",
-                color: "#333",
-                background: "white",
-                cursor: "pointer",
-              }}
-            >
-              {["All", ...new Set((data.all_records || []).map(r => r.department))].map(d => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
-          )}
+        <div>
+          <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Start Date</label>
+          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+            style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid #E4E7EB", fontSize: "13px" }} />
         </div>
+        <div>
+          <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>End Date</label>
+          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
+            style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid #E4E7EB", fontSize: "13px" }} />
+        </div>
+        <div style={{ flex: 1, minWidth: "200px" }}>
+          <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Employee IDs (comma separated)</label>
+          <input type="text" value={userIds} onChange={(e) => setUserIds(e.target.value)}
+            placeholder="e.g. 01141, 01142, 770"
+            style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid #E4E7EB", fontSize: "13px", boxSizing: "border-box" }} />
+        </div>
+        <button
+          onClick={handleFetch}
+          style={{
+            padding: "9px 20px", borderRadius: "8px", border: "none",
+            background: "#1e3a5f", color: "white", fontWeight: 600,
+            fontSize: "13px", cursor: "pointer",
+          }}
+        >
+          Fetch Report
+        </button>
+      </div>
 
-        {loading ? (
-          <p>Loading...</p>
+      {/* Results */}
+      <div style={{ background: "white", borderRadius: "12px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
+        <h3 style={{ margin: "0 0 16px", color: "#1e3a5f" }}>{TABS[activeTab].label}</h3>
 
-        ) : currentType === "summary" && data ? (
-          <>
-            {/* ── Summary Cards (clickable) ── */}
-            <div style={{ display: "flex", gap: "10px", marginBottom: "24px", flexWrap: "wrap" }}>
-              {[
-                { label: "Total",    key: "total",    value: data.total,    color: "#1e3a5f" },
-                { label: "Present",  key: "present",  value: data.present,  color: "#2e7d32" },
-                { label: "Absent",   key: "absent",   value: data.absent,   color: "#c62828" },
-                { label: "On Leave", key: "on_leave", value: data.on_leave, color: "#f57f17" },
-              ].map((card) => (
-                <div
-                  key={card.label}
-                  onClick={() => setActiveFilter(card.key)}
-                  style={{
-                    background: activeFilter === card.key ? card.color : "#fafafa",
-                    border: `1px solid ${card.color}`,
-                    borderRadius: "8px",
-                    padding: "8px 16px",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    color: activeFilter === card.key ? "white" : "#333",
-                    transition: "background 0.2s",
-                  }}
-                >
-                  {card.label} : <strong>{card.value}</strong>
-                </div>
-              ))}
-            </div>
-            {/* ── Filtered Staff List ── */}
-            <StaffTable records={data[FILTER_MAP[activeFilter]]} />
-          </>
+        {error   && <p style={{ color: "#c62828" }}>{error}</p>}
+        {loading && <p>Loading...</p>}
 
-        ) : currentType === "dept" && data ? (
-          <DeptSection data={data} activeFilter={activeFilter} setActiveFilter={setActiveFilter} deptFilter={deptFilter} />
-
-        ) : currentType === "staff" && Array.isArray(data) ? (
-          <StaffTable records={data} />
-
-        ) : (
-          <p style={{ color: "#999" }}>No data available.</p>
+        {!loading && !error && !data && (
+          <p style={{ color: "#999" }}>Fill in the filters above and click Fetch Report.</p>
         )}
+
+        {!loading && data && currentType === "summary" && <SummaryView data={data} />}
+        {!loading && data && currentType === "dept"    && <DeptView    data={data} />}
+        {!loading && data && currentType === "dated"   && <DatedView   data={data} />}
       </div>
     </div>
   );
 }
-
-const td = { padding: "12px", fontSize: "13px", color: "#333", textAlign: "left" };
-const th = { padding: "12px", textAlign: "left", fontSize: "13px", fontWeight: 600 };
 
 export default Attendance;

@@ -1,55 +1,150 @@
-from mockdata import employees, attendance_records
+from biostar_connector import fetch_daily_attendance
+from datetime import datetime, timedelta
 
-emp_map = {e["user_id"]: e for e in employees}
 
-def _staff(user_id):
-    emp = emp_map.get(user_id, {})
-    return {
-        "employee_id": user_id,
-        "name":        emp.get("name", "—"),
-        "card_id":     emp.get("card_id", "—"),
-    }
+def attendance_summary(start_date, end_date, user_ids):
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
 
-def get_attendance_summary():
-    present  = [r for r in attendance_records if r["check_in"] and not r["on_leave"]]
-    absent   = [r for r in attendance_records if not r["check_in"] and not r["on_leave"]]
-    on_leave = [r for r in attendance_records if r["on_leave"]]
-    return {
-        "total":           len(attendance_records),
-        "present":         len(present),
-        "absent":          len(absent),
-        "on_leave":        len(on_leave),
-        "all_records":     [_staff(r["user_id"]) for r in attendance_records],
-        "present_records": [_staff(r["user_id"]) for r in present],
-        "absent_records":  [_staff(r["user_id"]) for r in absent],
-        "on_leave_records":[_staff(r["user_id"]) for r in on_leave],
-    }
+    present = []
+    absent = []
 
-def get_attendance_by_department():
-    dept_map = {e["user_id"]: e["department"] for e in employees}
+    current = start
+    while current <= end:
+        date_str = current.strftime("%Y-%m-%d")
+        data = fetch_daily_attendance(date_str, date_str, user_ids)
+        records = data.get("records", [])
 
-    def _staff_with_dept(r):
-        s = _staff(r["user_id"])
-        s["department"] = dept_map.get(r["user_id"], "Unknown")
-        return s
+        for record in records:
+            record["date"] = date_str
+            if record["inTime"] != "-":
+                present.append(record)
+            else:
+                absent.append(record)
 
-    present  = [r for r in attendance_records if r["check_in"] and not r["on_leave"]]
-    absent   = [r for r in attendance_records if not r["check_in"] and not r["on_leave"]]
-    on_leave = [r for r in attendance_records if r["on_leave"]]
+        current += timedelta(days=1)
 
     return {
-        "total":           len(attendance_records),
-        "present":         len(present),
-        "absent":          len(absent),
-        "on_leave":        len(on_leave),
-        "all_records":     [_staff_with_dept(r) for r in attendance_records],
-        "present_records": [_staff_with_dept(r) for r in present],
-        "absent_records":  [_staff_with_dept(r) for r in absent],
-        "on_leave_records":[_staff_with_dept(r) for r in on_leave],
+        "present_count": len(present),
+        "absent_count": len(absent),
+        "present": present,
+        "absent": absent,
     }
 
-def get_public_holiday_attendance():
-    return [_staff(r["user_id"]) for r in attendance_records if r["is_public_holiday"]]
 
-def get_weekend_attendance():
-    return [_staff(r["user_id"]) for r in attendance_records if r["is_weekend"]]
+def attendance_by_department(start_date, end_date, user_ids):
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+
+    departments = {}
+
+    current = start
+    while current <= end:
+        date_str = current.strftime("%Y-%m-%d")
+        data = fetch_daily_attendance(date_str, date_str, user_ids)
+        records = data.get("records", [])
+
+        for record in records:
+            record["date"] = date_str
+            dept = record["userGroupName"]
+
+            if dept not in departments:
+                departments[dept] = {"present": [], "absent": []}
+
+            if record["inTime"] != "-":
+                departments[dept]["present"].append(record)
+            else:
+                departments[dept]["absent"].append(record)
+
+        current += timedelta(days=1)
+
+    summary = {}
+    for dept, groups in departments.items():
+        summary[dept] = {
+            "present_count": len(groups["present"]),
+            "absent_count": len(groups["absent"]),
+            "present": groups["present"],
+            "absent": groups["absent"],
+        }
+
+    return summary
+
+
+def attendance_on_weekends(start_date, end_date, user_ids):
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+
+    weekend_dates = []
+    current = start
+    while current <= end:
+        if current.weekday() in (5, 6):  # 5 = Saturday, 6 = Sunday
+            weekend_dates.append(current.strftime("%Y-%m-%d"))
+        current += timedelta(days=1)
+
+    results = {}
+    for date in weekend_dates:
+        data = fetch_daily_attendance(date, date, user_ids)
+        records = data.get("records", [])
+        for record in records:
+            record["date"] = date
+
+        present = [r for r in records if r["inTime"] != "-"]
+        absent  = [r for r in records if r["inTime"] == "-"]
+
+        results[date] = {
+            "present_count": len(present),
+            "absent_count": len(absent),
+            "present": present,
+            "absent": absent,
+        }
+
+    return results
+
+
+PUBLIC_HOLIDAYS_2025 = [
+    "2025-01-01",  # New Year's Day
+    "2025-01-26",  # Liberation Day
+    "2025-03-08",  # Women's Day
+    "2025-04-18",  # Good Friday
+    "2025-04-21",  # Easter Monday
+    "2025-05-01",  # Labour Day
+    "2025-06-03",  # Martyrs Day
+    "2025-06-09",  # Heroes Day
+    "2025-10-09",  # Independence Day
+    "2025-12-25",  # Christmas Day
+    "2025-12-26",  # Boxing Day
+]
+
+
+def attendance_on_public_holidays(start_date, end_date, user_ids):
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+
+    holidays_in_range = [
+        h for h in PUBLIC_HOLIDAYS_2025
+        if start <= datetime.strptime(h, "%Y-%m-%d") <= end
+    ]
+
+    if not holidays_in_range:
+        return {"message": "No public holidays in the selected date range", "results": {}}
+
+    results = {}
+
+    
+    for date in holidays_in_range:
+        data = fetch_daily_attendance(date, date, user_ids)
+        records = data.get("records", [])
+        for record in records:
+            record["date"] = date
+
+        present = [r for r in records if r["inTime"] != "-"]
+        absent  = [r for r in records if r["inTime"] == "-"]
+
+        results[date] = {
+            "present_count": len(present),
+            "absent_count":  len(absent),
+            "present": present,
+            "absent":  absent,
+        }
+
+    return results

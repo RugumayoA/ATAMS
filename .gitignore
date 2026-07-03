@@ -2,3 +2,5 @@ backend/venv/
 __pycache__/
 *.py[cod]
 .env
+backend/__pycache__/
+backend/Reports/__pycache__/

@@ -3,17 +3,26 @@ from datetime import datetime, timedelta
 
 
 def attendance_summary(start_date, end_date, user_ids):
-    data = fetch_daily_attendance(start_date, end_date, user_ids)
-    records = data.get("records", [])
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
 
     present = []
     absent = []
 
-    for record in records:
-        if record["inTime"] != "-":
-            present.append(record)
-        else:
-            absent.append(record)
+    current = start
+    while current <= end:
+        date_str = current.strftime("%Y-%m-%d")
+        data = fetch_daily_attendance(date_str, date_str, user_ids)
+        records = data.get("records", [])
+
+        for record in records:
+            record["date"] = date_str
+            if record["inTime"] != "-":
+                present.append(record)
+            else:
+                absent.append(record)
+
+        current += timedelta(days=1)
 
     return {
         "present_count": len(present),
@@ -24,21 +33,30 @@ def attendance_summary(start_date, end_date, user_ids):
 
 
 def attendance_by_department(start_date, end_date, user_ids):
-    data = fetch_daily_attendance(start_date, end_date, user_ids)
-    records = data.get("records", [])
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
 
     departments = {}
 
-    for record in records:
-        dept = record["userGroupName"]
+    current = start
+    while current <= end:
+        date_str = current.strftime("%Y-%m-%d")
+        data = fetch_daily_attendance(date_str, date_str, user_ids)
+        records = data.get("records", [])
 
-        if dept not in departments:
-            departments[dept] = {"present": [], "absent": []}
+        for record in records:
+            record["date"] = date_str
+            dept = record["userGroupName"]
 
-        if record["inTime"] != "-":
-            departments[dept]["present"].append(record)
-        else:
-            departments[dept]["absent"].append(record)
+            if dept not in departments:
+                departments[dept] = {"present": [], "absent": []}
+
+            if record["inTime"] != "-":
+                departments[dept]["present"].append(record)
+            else:
+                departments[dept]["absent"].append(record)
+
+        current += timedelta(days=1)
 
     summary = {}
     for dept, groups in departments.items():
@@ -67,6 +85,8 @@ def attendance_on_weekends(start_date, end_date, user_ids):
     for date in weekend_dates:
         data = fetch_daily_attendance(date, date, user_ids)
         records = data.get("records", [])
+        for record in records:
+            record["date"] = date
 
         present = [r for r in records if r["inTime"] != "-"]
         absent  = [r for r in records if r["inTime"] == "-"]
@@ -114,6 +134,8 @@ def attendance_on_public_holidays(start_date, end_date, user_ids):
     for date in holidays_in_range:
         data = fetch_daily_attendance(date, date, user_ids)
         records = data.get("records", [])
+        for record in records:
+            record["date"] = date
 
         present = [r for r in records if r["inTime"] != "-"]
         absent  = [r for r in records if r["inTime"] == "-"]

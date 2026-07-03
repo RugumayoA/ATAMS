@@ -1,55 +1,39 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 
-from Reports.time_exception_reports import (
-    get_late_clockin,
-    get_early_clockout,
-    get_early_clockin,
-    get_late_clockout,
-    get_incomplete_attendance,
-    get_abscondment,
-    get_meal_punch_only,
-    get_low_working_hours,
-)
+from Reports.time_exception_reports import time_exception_by_tab
 
 
 time_exceptions_bp = Blueprint("time_exceptions", __name__, url_prefix="/api/time_exceptions")
 
 
-@time_exceptions_bp.route("/late_clockin", methods=["GET"])
-def late_clockin():
-    return jsonify(get_late_clockin())
+@time_exceptions_bp.route("/<tab>", methods=["POST"])
+def get_time_exceptions(tab):
+    """
+    POST /api/time_exceptions/<tab>
 
+    <tab> must be one of:
+        late_clock_in, early_clock_out, early_clock_in, late_clock_out,
+        incomplete_attendance, abscondment, low_working_hours,
+        meal_punch_only   (placeholder - always returns empty)
 
-@time_exceptions_bp.route("/early_clockout", methods=["GET"])
-def early_clockout():
-    return jsonify(get_early_clockout())
+    Body:
+    {
+        "start_date": "2025-02-01",
+        "end_date":   "2025-02-01",
+        "user_ids":   ["1141", "1142"]   # optional - omit for all users
+    }
+    """
+    body = request.get_json(force=True)
+    start_date = body.get("start_date")
+    end_date = body.get("end_date")
+    user_ids = body.get("user_ids")
 
+    if not all([start_date, end_date]):
+        return jsonify({"error": "start_date and end_date are required"}), 400
 
-@time_exceptions_bp.route("/early_clockin", methods=["GET"])
-def early_clockin():
-    return jsonify(get_early_clockin())
+    try:
+        result = time_exception_by_tab(tab, start_date, end_date, user_ids)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
 
-
-@time_exceptions_bp.route("/late_clockout", methods=["GET"])
-def late_clockout():
-    return jsonify(get_late_clockout())
-
-
-@time_exceptions_bp.route("/incomplete_attendance", methods=["GET"])
-def incomplete_attendance():
-    return jsonify(get_incomplete_attendance())
-
-
-@time_exceptions_bp.route("/abscondment", methods=["GET"])
-def abscondment():
-    return jsonify(get_abscondment())
-
-
-@time_exceptions_bp.route("/meal_punch_only", methods=["GET"])
-def meal_punch_only():
-    return jsonify(get_meal_punch_only())
-
-
-@time_exceptions_bp.route("/low_working_hours", methods=["GET"])
-def low_working_hours():
-    return jsonify(get_low_working_hours())
+    return jsonify(result)

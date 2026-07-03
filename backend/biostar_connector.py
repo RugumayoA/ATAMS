@@ -60,6 +60,13 @@ ALL_USERS_URL = "https://api.caa.co.ug/queryallemployeesfromatams/1.0.0/callallu
 def fetch_daily_attendance(start_date, end_date, user_ids):
     token = get_token(DAILY_CREDS)
 
+    # Biostar's API expects userID as ONE comma-separated string
+    # (e.g. "01141, 01142, 01143"), not a JSON array. If the caller passes
+    # a Python list (e.g. straight from a request body), convert it here
+    # so callers don't have to worry about the format.
+    if isinstance(user_ids, (list, tuple)):
+        user_ids = ", ".join(str(uid) for uid in user_ids)
+
     response = requests.post(
         DAILY_URL,
         json={

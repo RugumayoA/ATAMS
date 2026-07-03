@@ -18,17 +18,19 @@ function RecordTable({ records }) {
   return (
     <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
       <colgroup>
-        <col style={{ width: "15%" }} />
-        <col style={{ width: "30%" }} />
+        <col style={{ width: "12%" }} />
         <col style={{ width: "25%" }} />
-        <col style={{ width: "15%" }} />
-        <col style={{ width: "15%" }} />
+        <col style={{ width: "22%" }} />
+        <col style={{ width: "13%" }} />
+        <col style={{ width: "14%" }} />
+        <col style={{ width: "14%" }} />
       </colgroup>
       <thead>
         <tr style={{ background: "#1e3a5f", color: "white" }}>
           <th style={th}>Employee ID</th>
           <th style={th}>Name</th>
           <th style={th}>Department</th>
+          <th style={th}>Date</th>
           <th style={th}>In Time</th>
           <th style={th}>Out Time</th>
         </tr>
@@ -39,6 +41,7 @@ function RecordTable({ records }) {
             <td style={td}>{r.userId}</td>
             <td style={td}>{r.userName}</td>
             <td style={td}>{r.userGroupName}</td>
+            <td style={td}>{r.date}</td>
             <td style={td}>{r.inTime}</td>
             <td style={td}>{r.outTime}</td>
           </tr>

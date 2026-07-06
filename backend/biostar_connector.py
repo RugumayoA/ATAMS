@@ -105,3 +105,27 @@ def fetch_all_users_attendance(start_date, end_date):
     return response.json()
 
 
+from datetime import datetime, timedelta
+
+def fetch_daily_attendance_range(start_date, end_date, user_ids=None):
+    """
+    Loops day-by-day between start_date and end_date (inclusive), calling
+    fetch_daily_attendance once per day, and manually attaches a "date"
+    field to every record - because Biostar's API does NOT include a date
+    field in its response, even across multi-day queries (confirmed
+    against a real 423-record multi-day response with zero date fields).
+    """
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+
+    all_records = []
+    current = start
+    while current <= end:
+        day_str = current.strftime("%Y-%m-%d")
+        data = fetch_daily_attendance(day_str, day_str, user_ids)
+        for record in data.get("records", []):
+            record["date"] = day_str
+            all_records.append(record)
+        current += timedelta(days=1)
+
+    return {"records": all_records, "total": len(all_records)}

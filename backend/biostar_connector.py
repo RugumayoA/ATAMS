@@ -57,9 +57,38 @@ DAILY_URL = "https://api.caa.co.ug/dailyattendanceapi/1.0.0/calldailyusers"
 ALL_USERS_URL = "https://api.caa.co.ug/queryallemployeesfromatams/1.0.0/callallusers"
 
 
-def fetch_daily_attendance(start_date, end_date, user_ids):
-    token = get_token(DAILY_CREDS)
+def _post_with_auth(url, creds, payload):
+    # The gateway is WSO2-fronted; a token that was JUST issued can get a
+    # spurious 401 for a moment because the gateway node hasn't synced with
+    # the key manager yet (common right after a token cache miss, e.g. on
+    # backend startup). Drop the cached token and retry once before giving up.
+    token = get_token(creds)
+    response = requests.post(
+        url,
+        json=payload,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+    )
 
+    if response.status_code == 401:
+        _token_cache.pop(creds["client_id"], None)
+        token = get_token(creds)
+        response = requests.post(
+            url,
+            json=payload,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
+        )
+
+    response.raise_for_status()
+    return response.json()
+
+
+def fetch_daily_attendance(start_date, end_date, user_ids):
     # Biostar's API expects userID as ONE comma-separated string
     # (e.g. "01141, 01142, 01143"), not a JSON array. If the caller passes
     # a Python list (e.g. straight from a request body), convert it here
@@ -67,42 +96,30 @@ def fetch_daily_attendance(start_date, end_date, user_ids):
     if isinstance(user_ids, (list, tuple)):
         user_ids = ", ".join(str(uid) for uid in user_ids)
 
-    response = requests.post(
+    return _post_with_auth(
         DAILY_URL,
-        json={
+        DAILY_CREDS,
+        {
             "attendancedaily": {
                 "start_datetime": start_date,
                 "end_datetime": end_date,
                 "userID": user_ids,
             }
         },
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
     )
-    response.raise_for_status()
-    return response.json()
 
 
 def fetch_all_users_attendance(start_date, end_date):
-    token = get_token(ALL_USERS_CREDS)
-
-    response = requests.post(
+    return _post_with_auth(
         ALL_USERS_URL,
-        json={
+        ALL_USERS_CREDS,
+        {
             "attendance": {
                 "start_datetime": start_date,
                 "end_datetime": end_date,
             }
         },
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
     )
-    response.raise_for_status()
-    return response.json()
 
 
 from datetime import datetime, timedelta

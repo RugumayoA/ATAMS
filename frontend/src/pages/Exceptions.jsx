@@ -1,6 +1,7 @@
 import { useState } from "react";
 import API from "../components/api/axios";
 import { AlertTriangle } from "lucide-react";
+import ExportButtons from "../components/ExportButtons"; // NEW
 
 const TABS = [
   { label: "Late Clock In",         endpoint: "/time_exceptions/late_clock_in"         },
@@ -21,6 +22,17 @@ function Exceptions() {
   const [records, setRecords]     = useState([]);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState("");
+
+  // NEW — filename slug and export columns derived from the active tab and current data
+  const tabSlug = TABS[activeTab].label.toLowerCase().replace(/\s+/g, "_");
+
+  const exportColumns =
+    records.length > 0
+      ? Object.keys(records[0]).map((key) => ({
+          key,
+          label: key.replace(/_/g, " "),
+        }))
+      : null;
 
   function handleFetch() {
     if (!startDate || !endDate) {
@@ -130,16 +142,26 @@ function Exceptions() {
           <h3 style={{ margin: 0, color: "#1e3a5f" }}>
             {TABS[activeTab].label}
           </h3>
-          <span style={{
-            background: "#1e3a5f",
-            color: "white",
-            borderRadius: "20px",
-            padding: "4px 14px",
-            fontSize: "13px",
-            fontWeight: 500,
-          }}>
-            {records.length} record{records.length !== 1 ? "s" : ""}
-          </span>
+
+          {/* NEW — export buttons next to the record count badge */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <ExportButtons
+              data={records}
+              filename={`time_exceptions_${tabSlug}`}
+              title={`Time Exceptions — ${TABS[activeTab].label}`}
+              columns={exportColumns}
+            />
+            <span style={{
+              background: "#1e3a5f",
+              color: "white",
+              borderRadius: "20px",
+              padding: "4px 14px",
+              fontSize: "13px",
+              fontWeight: 500,
+            }}>
+              {records.length} record{records.length !== 1 ? "s" : ""}
+            </span>
+          </div>
         </div>
 
         {error && <p style={{ color: "#c62828" }}>{error}</p>}

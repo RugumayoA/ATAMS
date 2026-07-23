@@ -146,3 +146,64 @@ def fetch_daily_attendance_range(start_date, end_date, user_ids=None):
         current += timedelta(days=1)
 
     return {"records": all_records, "total": len(all_records)}
+
+
+
+
+
+import os
+import requests
+import urllib3
+
+BIOSTAR_HOST = os.environ["BIOSTAR_LOCAL_HOST"]   
+BIOSTAR_USER = os.environ["BIOSTAR_LOCAL_USER"]
+BIOSTAR_PASS = os.environ["BIOSTAR_LOCAL_PASS"]
+
+# The local box almost certainly serves a self-signed cert (see note below).
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+_VERIFY = False
+
+_session_id = None   # module-level cache, same idea as your OAuth2 token cache
+
+def _login():
+    """POST /api/login and capture the session-id header."""
+    resp = requests.post(
+        f"{BIOSTAR_HOST}/api/login",
+        json={"User": {"login_id": BIOSTAR_USER, "password": BIOSTAR_PASS}},
+        verify=_VERIFY,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    # requests headers are case-insensitive, so casing of the key doesn't matter.
+    session_id = resp.headers.get("bs-session-id")
+    if not session_id:  # fall back to whatever session header the server used
+        session_id = next(
+            (v for k, v in resp.headers.items() if "session-id" in k.lower()),
+            None,
+        )
+    if not session_id:
+        raise RuntimeError(
+            f"Login OK but no session-id header. Headers: {list(resp.headers.keys())}"
+        )
+    global _session_id
+    _session_id = session_id
+    return session_id
+
+def _get_session():
+    return _session_id or _login()
+
+def search_events(body: dict) -> dict:
+    """POST /api/events/search; re-login once if the session has expired."""
+    def _do(sid):
+        return requests.post(
+            f"{BIOSTAR_HOST}/api/events/search",
+            headers={"bs-session-id": sid, "Content-Type": "application/json"},
+            json=body,
+            verify=_VERIFY,
+            timeout=90,
+        )
+    resp = _do(_get_session())
+    if resp.status_code == 401:      # expired session -> log in again, retry once
+        resp = _do(_login())
+    resp.raise_for_status()
+    return resp.json()

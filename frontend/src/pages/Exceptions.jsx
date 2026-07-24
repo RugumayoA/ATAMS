@@ -1,55 +1,82 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import API from "../components/api/axios";
-import { AlertTriangle } from "lucide-react";
-import ExportButtons from "../components/ExportButtons"; // NEW
+import { Users as UsersIcon } from "lucide-react";
+import ExportButtons from "../components/ExportButtons";
 
+// Active Staff (1326 users) rather than All Users (1919), so exited staff
+// appear only when deliberately selected.
+const DEFAULT_GROUP_ID = "5760";
+
+// All nine reports. `ready` marks what is actually built.
 const TABS = [
-  { label: "Late Clock In",         endpoint: "/time_exceptions/late_clock_in"         },
-  { label: "Early Clock Out",       endpoint: "/time_exceptions/early_clock_out"       },
-  { label: "Early Clock In",        endpoint: "/time_exceptions/early_clock_in"        },
-  { label: "Late Clock Out",        endpoint: "/time_exceptions/late_clock_out"        },
-  { label: "Incomplete Attendance", endpoint: "/time_exceptions/incomplete_attendance" },
-  { label: "Abscondment",           endpoint: "/time_exceptions/abscondment"           },
-  { label: "Meal Punch Only",       endpoint: "/time_exceptions/meal_punch_only"       },
-  { label: "Low Working Hours",     endpoint: "/time_exceptions/low_working_hours"     },
+  { label: "User Information",            endpoint: "/users/information", ready: true  },
+  { label: "Users on Device",             endpoint: null,                 ready: false },
+  { label: "Users Without Credentials",   endpoint: null,                 ready: false },
+  { label: "Users Category",              endpoint: null,                 ready: false },
+  { label: "New Users",                   endpoint: null,                 ready: false },
+  { label: "All Users",                   endpoint: null,                 ready: false },
+  { label: "Exceptional Users",           endpoint: null,                 ready: false },
+  { label: "Periods Expiring (30 Days)",  endpoint: null,                 ready: false },
+  { label: "Idle Active Operators",       endpoint: null,                 ready: false },
 ];
 
-function Exceptions() {
+const COLUMNS = [
+  { key: "user_id",       label: "User ID"       },
+  { key: "name",          label: "Name"          },
+  { key: "department",    label: "Department"    },
+  { key: "directorate",   label: "Directorate"   },
+  { key: "category",      label: "Category"      },
+  { key: "credentials",   label: "Credentials"   },
+  { key: "operator_role", label: "Operator Role" },
+  { key: "status",        label: "Status"        },
+  { key: "expiry_date",   label: "Expires (EAT)" },
+];
+
+function Users() {
   const [activeTab, setActiveTab] = useState(0);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate]     = useState("");
-  const [userIds, setUserIds]     = useState("");
-  const [records, setRecords]     = useState([]);
+  const [groups, setGroups]       = useState([]);
+  const [groupId, setGroupId]     = useState(DEFAULT_GROUP_ID);
+  const [search, setSearch]       = useState("");
+  const [report, setReport]       = useState(null);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState("");
 
-  // NEW — filename slug and export columns derived from the active tab and current data
-  const tabSlug = TABS[activeTab].label.toLowerCase().replace(/\s+/g, "_");
+  const tab = TABS[activeTab];
 
-  const exportColumns =
-    records.length > 0
-      ? Object.keys(records[0]).map((key) => ({
-          key,
-          label: key.replace(/_/g, " "),
-        }))
-      : null;
+  // The group picker is one fast call, so it loads on mount. The report is not
+  // — a large group is many sequential requests to BioStar.
+  useEffect(() => {
+    API.get("/users/groups")
+      .then((res) => setGroups(res.data.groups || []))
+      .catch(() => setError("Could not load the group list. Check that you are on the CAA network."));
+  }, []);
+
+  const rows = report?.rows || [];
+
+  const term = search.trim().toLowerCase();
+  const filtered = !term
+    ? rows
+    : rows.filter((r) =>
+        [r.user_id, r.name, r.department, r.directorate, r.category]
+          .join(" ").toLowerCase().includes(term)
+      );
+
+  const selectedGroupName = groups.find((g) => g.id === groupId)?.name || "";
+  const groupSlug = selectedGroupName.toLowerCase().replace(/\s+/g, "_");
 
   function handleFetch() {
-    if (!startDate || !endDate) {
-      setError("Please select a start and end date before fetching.");
-      return;
-    }
+    if (!tab.ready) return;
     setError("");
     setLoading(true);
-    setRecords([]);
+    setReport(null);
 
-    API.post(TABS[activeTab].endpoint, {
-      start_date: startDate,
-      end_date:   endDate,
-      user_ids:   userIds.trim() ? userIds.split(",").map((id) => id.trim()) : undefined,
-    })
-      .then((res) => { setRecords(res.data.records || []); setLoading(false); })
-      .catch((err) => { console.error(err); setError("Failed to fetch data."); setLoading(false); });
+    API.get(tab.endpoint, { params: { group_id: groupId } })
+      .then((res) => { setReport(res.data); setLoading(false); })
+      .catch((err) => {
+        console.error(err);
+        setError(err.response?.data?.message || "Failed to fetch data.");
+        setLoading(false);
+      });
   }
 
   return (
@@ -63,18 +90,18 @@ function Exceptions() {
         color: "white",
         marginBottom: "30px"
       }}>
-        <h1 style={{ margin: 0, display: "flex", alignItems: "center", gap: "10px" , fontSize: "22px", fontWeight: 600, color: "white"}}>
-         <AlertTriangle size={28} color="white" />
-         TIME EXCEPTIONS REPORTS
-       </h1>
+        <h1 style={{ margin: 0, display: "flex", alignItems: "center", gap: "10px", fontSize: "22px", fontWeight: 600, color: "white" }}>
+          <UsersIcon size={28} color="white" />
+          USERS REPORTS
+        </h1>
       </div>
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
-        {TABS.map((tab, i) => (
+        {TABS.map((t, i) => (
           <button
             key={i}
-            onClick={() => { setActiveTab(i); setRecords([]); setError(""); }}
+            onClick={() => { setActiveTab(i); setReport(null); setError(""); setSearch(""); }}
             style={{
               padding: "10px 16px",
               borderRadius: "8px",
@@ -82,11 +109,11 @@ function Exceptions() {
               cursor: "pointer",
               fontWeight: activeTab === i ? "bold" : "normal",
               background: activeTab === i ? "#1e3a5f" : "#f0f0f0",
-              color: activeTab === i ? "white" : "#333",
+              color: activeTab === i ? "white" : t.ready ? "#333" : "#888",
               fontSize: "13px",
             }}
           >
-            {tab.label}
+            {t.label}
           </button>
         ))}
       </div>
@@ -103,28 +130,40 @@ function Exceptions() {
         flexWrap: "wrap",
         alignItems: "flex-end",
       }}>
-        <div>
-          <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Start Date</label>
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-            style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid #E4E7EB", fontSize: "13px" }} />
-        </div>
-        <div>
-          <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>End Date</label>
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-            style={{ padding: "8px 10px", borderRadius: "8px", border: "1px solid #E4E7EB", fontSize: "13px" }} />
+        <div style={{ flex: 1, minWidth: "260px" }}>
+          <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Group</label>
+          <select
+            value={groupId}
+            onChange={(e) => setGroupId(e.target.value)}
+            disabled={!tab.ready || groups.length === 0}
+            style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid #E4E7EB", fontSize: "13px", boxSizing: "border-box", background: "white" }}
+          >
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>
+                {"\u00A0".repeat(g.depth * 3)}{g.name}{g.direct_user_count > 0 ? ` (${g.direct_user_count})` : ""}
+              </option>
+            ))}
+          </select>
         </div>
         <div style={{ flex: 1, minWidth: "200px" }}>
-          <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Employee IDs (comma separated, optional)</label>
-          <input type="text" value={userIds} onChange={(e) => setUserIds(e.target.value)}
-            placeholder="e.g. 1141, 1142"
-            style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid #E4E7EB", fontSize: "13px", boxSizing: "border-box" }} />
+          <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "4px" }}>Filter results (optional)</label>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="e.g. Okot, 1141, Licensing"
+            disabled={!tab.ready}
+            style={{ width: "100%", padding: "8px 10px", borderRadius: "8px", border: "1px solid #E4E7EB", fontSize: "13px", boxSizing: "border-box" }}
+          />
         </div>
         <button
           onClick={handleFetch}
+          disabled={!tab.ready || loading}
           style={{
             padding: "9px 20px", borderRadius: "8px", border: "none",
             background: "#1e3a5f", color: "white", fontWeight: 600,
-            fontSize: "13px", cursor: "pointer",
+            fontSize: "13px", cursor: tab.ready && !loading ? "pointer" : "not-allowed",
+            opacity: tab.ready && !loading ? 1 : 0.55,
           }}
         >
           Fetch Report
@@ -139,17 +178,14 @@ function Exceptions() {
         boxShadow: "0 2px 12px rgba(0,0,0,0.08)"
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-          <h3 style={{ margin: 0, color: "#1e3a5f" }}>
-            {TABS[activeTab].label}
-          </h3>
+          <h3 style={{ margin: 0, color: "#1e3a5f" }}>{tab.label}</h3>
 
-          {/* NEW — export buttons next to the record count badge */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <ExportButtons
-              data={records}
-              filename={`time_exceptions_${tabSlug}`}
-              title={`Time Exceptions — ${TABS[activeTab].label}`}
-              columns={exportColumns}
+              data={filtered}
+              filename={`user_${tab.label.toLowerCase().replace(/\s+/g, "_")}_${groupSlug}`}
+              title={`${tab.label} — ${selectedGroupName}`}
+              columns={COLUMNS}
             />
             <span style={{
               background: "#1e3a5f",
@@ -159,35 +195,64 @@ function Exceptions() {
               fontSize: "13px",
               fontWeight: 500,
             }}>
-              {records.length} record{records.length !== 1 ? "s" : ""}
+              {filtered.length} record{filtered.length !== 1 ? "s" : ""}
             </span>
           </div>
         </div>
 
         {error && <p style={{ color: "#c62828" }}>{error}</p>}
 
-        {loading ? <p>Loading...</p> : !error && records.length === 0 ? (
-          <p style={{ color: "#999" }}>No records found. Fill in the filters above and click Fetch Report.</p>
+        {report && !error && !loading && (
+          <p style={{ color: "#666", fontSize: "13px", marginTop: 0 }}>
+            <strong>{report.group.name}</strong>
+            {report.group.directorate ? ` · ${report.group.directorate}` : ""}
+            {" — "}
+            {filtered.length === rows.length
+              ? `${report.returned} of ${report.reported_total} users`
+              : `${filtered.length} of ${report.returned} shown`}
+            {!report.complete && (
+              <span style={{ color: "#b06a12", fontWeight: 600 }}>
+                {" "}· incomplete: fewer rows returned than the server reported
+              </span>
+            )}
+            {report.unassigned_count > 0 && (
+              <span style={{ color: "#b06a12" }}>
+                {" "}· {report.unassigned_count} user{report.unassigned_count !== 1 ? "s" : ""} with no directorate assigned
+              </span>
+            )}
+          </p>
+        )}
+
+        {!tab.ready ? (
+          <p style={{ color: "#999" }}>This report has not been built yet.</p>
+        ) : loading ? (
+          <p>Loading... Large groups are fetched in pages of 100, so this can take a while.</p>
+        ) : !error && filtered.length === 0 ? (
+          <p style={{ color: "#999" }}>
+            {report
+              ? "No users match the current group and filter."
+              : "No records found. Choose a group above and click Fetch Report."}
+          </p>
         ) : !error && (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#1e3a5f", color: "white" }}>
-                {Object.keys(records[0]).map((key) => (
-                  <th key={key} style={{ padding: "12px", textAlign: "left", fontSize: "13px" }}>
-                    {key.replace(/_/g, " ")}
+                {COLUMNS.map((col) => (
+                  <th key={col.key} style={{ padding: "12px", textAlign: "left", fontSize: "13px" }}>
+                    {col.label}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {records.map((rec, i) => (
-                <tr key={i} style={{
-                  background: i % 2 === 0 ? "#f9f9f9" : "white",
+              {filtered.map((rec, i) => (
+                <tr key={rec.user_id} style={{
+                  background: rec.unassigned ? "#fffaf0" : i % 2 === 0 ? "#f9f9f9" : "white",
                   borderBottom: "1px solid #eee"
                 }}>
-                  {Object.values(rec).map((val, j) => (
-                    <td key={j} style={td}>
-                      {val === null ? "—" : val === true ? "Yes" : val === false ? "No" : String(val)}
+                  {COLUMNS.map((col) => (
+                    <td key={col.key} style={td}>
+                      {rec[col.key] === null || rec[col.key] === "" ? "—" : String(rec[col.key])}
                     </td>
                   ))}
                 </tr>
@@ -206,4 +271,4 @@ const td = {
   color: "#333"
 };
 
-export default Exceptions;
+export default Users;

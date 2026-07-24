@@ -149,10 +149,9 @@ def fetch_daily_attendance_range(start_date, end_date, user_ids=None):
 
 
 
+#----------SERVER INTERFACE TO BIOSTAR ----------------------
 
 
-import os
-import requests
 import urllib3
 
 BIOSTAR_HOST = os.environ["BIOSTAR_LOCAL_HOST"]   
@@ -164,6 +163,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 _VERIFY = False
 
 _session_id = None   # module-level cache, same idea as your OAuth2 token cache
+
+
+
+
+# --------meals report interface to biostar ----------------------
 
 def _login():
     """POST /api/login and capture the session-id header."""
@@ -207,3 +211,55 @@ def search_events(body: dict) -> dict:
         resp = _do(_login())
     resp.raise_for_status()
     return resp.json()
+
+
+
+
+
+#-------user reoport interface to biostar ----------------------
+def get_user_groups() -> dict:
+    """GET /api/user_groups — all groups, raw. No tree building here."""
+    def _do(sid):
+        return requests.get(
+            f"{BIOSTAR_HOST}/api/user_groups",
+            headers={"bs-session-id": sid, "Content-Type": "application/json"},
+            verify=_VERIFY,
+            timeout=30,
+        )
+
+    resp = _do(_get_session())
+    if resp.status_code == 401:
+        resp = _do(_login())
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_users_in_group(group_id, limit=999, offset=0) -> dict:
+    """GET /api/users?group_id=... — one page of users, raw."""
+    params = {
+        "group_id": str(group_id),
+        "limit": int(limit),
+        "offset": int(offset),
+        "order_by": "user_id:true",
+        "last_modified": 0,
+    }
+
+    def _do(sid):
+        return requests.get(
+            f"{BIOSTAR_HOST}/api/users",
+            headers={"bs-session-id": sid, "Content-Type": "application/json"},
+            params=params,
+            verify=_VERIFY,
+            timeout=60,
+        )
+
+    resp = _do(_get_session())
+    if resp.status_code == 401:
+        resp = _do(_login())
+    resp.raise_for_status()
+    return resp.json()
+
+
+
+
+
